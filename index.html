@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<!--
+
+		J. Madeira - April 2021; Updated - March 2024
+
+-->
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title> 3D scene </title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <script type="importmap">
+        {
+          "imports": {
+            "three": "https://threejs.org/build/three.module.js",
+            "three/addons/": "https://threejs.org/examples/jsm/"
+          }
+        }
+      </script>
+
+    <script type="module">
+
+        import * as THREE from "three";
+
+        import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+
+        // To store the scene graph, and elements usefull to rendering the scene
+        const sceneElements = {
+            sceneGraph: null,
+            camera: null,
+            control: null,  // NEW
+            renderer: null,
+        };
+
+        // HELPER FUNCTIONS
+
+        const helper = {
+
+            initEmptyScene: function (sceneElements) {
+
+                // ************************** //
+                // Create the 3D scene
+                // ************************** //
+                sceneElements.sceneGraph = new THREE.Scene();
+
+                // ************************** //
+                // Add camera
+                // ************************** //
+                const width = window.innerWidth;
+                const height = window.innerHeight;
+                const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 500);
+                sceneElements.camera = camera;
+                camera.position.set(2, 4, 8);
+                camera.lookAt(0, 0, 0);
+
+                // ************************** //
+                // Illumination
+                // ************************** //
+
+                // ************************** //
+                // Add ambient light
+                // ************************** //
+                const ambientLight = new THREE.AmbientLight('rgb(255, 255, 255)', 0.2);
+                sceneElements.sceneGraph.add(ambientLight);
+
+                // ***************************** //
+                // Add point light souce (with shadows)
+                // ***************************** //
+                const light_1 = new THREE.DirectionalLight('rgb(255, 255, 255)', 1);
+                light_1.position.set(0, 10, 2);
+                light_1.castShadow = true;
+                sceneElements.sceneGraph.add(light_1);
+
+
+
+
+                // *********************************** //
+                // Create renderer (with shadow map)
+                // *********************************** //
+                const renderer = new THREE.WebGLRenderer({ antialias: true });
+                sceneElements.renderer = renderer;
+                renderer.setPixelRatio(window.devicePixelRatio);
+                renderer.setClearColor('rgb(0, 255, 255)', 1.0);
+                renderer.setSize(width, height);
+
+                // Setup shadowMap property
+                renderer.shadowMap.enabled = true;
+                renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+                // **************************************** //
+                // Add the rendered image in the HTML DOM
+                // **************************************** //
+                const htmlElement = document.querySelector("#Tag3DScene");
+                htmlElement.appendChild(renderer.domElement);
+
+                // ************************** //
+                // NEW --- Control for the camera
+                // ************************** //
+                //sceneElements.control = new OrbitControls(camera, renderer.domElement);
+                //sceneElements.control.screenSpacePanning = true;
+            },
+
+            render: function (sceneElements) {
+                sceneElements.renderer.render(sceneElements.sceneGraph, sceneElements.camera);
+            },
+        };
+
+        // FUCNTIONS FOR BUILDING THE SCENE
+        function createTree(scaleY = 1) {
+
+            // Creating a model by grouping basic geometries
+
+            // Cylinder centered at the origin
+
+            const cylinderRadius = 0.25;
+
+            const cylinderHeight = 1;
+
+            const cylinderGeometry = new THREE.CylinderGeometry(cylinderRadius, cylinderRadius, cylinderHeight, 32);
+
+            const redMaterial = new THREE.MeshLambertMaterial({ color: 0xff0000 });
+
+            const cylinder = new THREE.Mesh(cylinderGeometry, redMaterial);
+
+            // Move base of the cylinder to y = 0
+
+            cylinder.position.y = cylinderHeight / 2.0;
+
+            // Cone
+
+            const baseConeRadius = 0.5;
+
+            const coneHeight = 1.5;
+
+            const coneGeometry = new THREE.ConeGeometry(baseConeRadius, coneHeight, 32);
+
+            const greenMaterial = new THREE.MeshLambertMaterial({ color: 0x00ff00 });
+
+            const cone = new THREE.Mesh(coneGeometry, greenMaterial);
+
+            // Move base of the cone to the top of the cylinder
+
+            cone.position.y = cylinderHeight + coneHeight / 2.0;
+
+            // Tree
+
+            const tree = new THREE.Group();
+
+            tree.add(cylinder);
+
+            tree.add(cone);
+            tree.scale.set(1, scaleY)
+            return tree;
+        }
+
+
+        const scene = {
+
+            // Create and insert in the scene graph the models of the 3D scene
+
+            load3DObjects: function (sceneGraph) {
+
+                // USA ESTE PLANO PARA TESTAR AS SOMBRAS
+
+                const planeGeometry = new THREE.PlaneGeometry(60, 100);
+                const planeMaterial = new THREE.MeshPhongMaterial({ color: 'rgb(0,255,0)', side: THREE.DoubleSide });
+                const planeObject = new THREE.Mesh(planeGeometry, planeMaterial);
+                planeObject.rotation.x = Math.PI / 2;
+                sceneGraph.add(planeObject);
+
+                /*const planeObject2 = new THREE.Mesh(planeGeometry, planeMaterial);
+                planeObject2.rotation.x = Math.PI / 2;
+                planeObject2.position.set(0, 3, 0);
+                sceneGraph.add(planeObject2);*/
+
+                // Set shadow property
+                planeObject.receiveShadow = true;
+
+                // ************************** //
+                // Create the forest
+                // ************************** //
+
+                const trees = []
+                for(let i = 0;i<20;i++){
+                    const tree = createTree();
+                    tree.position.set((Math.random() - 0.5) * 60, 0, (Math.random() - 0.5) * 100)
+                    sceneElements.sceneGraph.add(tree)
+                    tree.castShadow = true
+                    trees.push(tree)
+                }
+
+                // ************************** //
+                // Create a cube
+                // ************************** //
+                // cube center is at (0,0,0)
+
+                const cubeGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+                const cubeMaterial = new THREE.MeshPhongMaterial({ color: 'rgb(0,255,255)' });
+                const cubeObject = new THREE.Mesh(cubeGeometry, cubeMaterial);
+                cubeObject.name = "cube";
+                cubeObject.position.set(0, 0.5, 0);
+                cubeObject.castShadow = true;
+                sceneGraph.add(cubeObject);
+
+            }
+        };
+
+        // COLLISION DETECTION
+        function boxCollision({ box1, box2 }) {
+            const box1Right = box1.position.x + 0.5 / 2
+            const box1Left = box1.position.x - 0.5 / 2
+            const box1Top = box1.position.y + 0.5 / 2
+            const box1Bottom = box1.position.y - 0.5 / 2
+            const box1Front = box1.position.z + 0.5 / 2
+            const box1Back = box1.position.z - 0.5 / 2
+
+            const box2Right = box2.position.x + 0.5 / 2
+            const box2Left = box2.position.x - 0.5 / 2
+            const box2Top = box2.position.y + 0.5 / 2
+            const box2Bottom = box2.position.y - 0.5 / 2
+            const box2Front = box2.position.z + 0.5 / 2
+            const box2Back = box2.position.z - 0.5 / 2
+
+            const xCollision = box1Right >= box2Left && box1Left <= box2Right
+            const yCollision =
+                box1Bottom + 0.02 <= box2Top && box1Top >= box2Bottom
+            const zCollision = box1Front >= box2Back && box1Back <= box2Front
+            return xCollision && yCollision && zCollision
+        }
+
+        // ANIMATION
+
+        // Displacement values
+        var delta = 0.1;
+        var dispX = 0.05, dispZ = 0.05;
+        var touchGround = false;
+
+        // To keep track of the keyboard - WASD
+        var keyD = false, keyA = false, keyS = false, keyW = false, keySpace = false;
+        var step = 0;
+
+        let frames = 0
+        let spawnRate = 200
+
+        function computeFrame(time) {
+
+            // Can extract an object from the scene Graph from its name
+            const light_1 = sceneElements.sceneGraph.getObjectByName("light 1");
+            const cube = sceneElements.sceneGraph.getObjectByName("cube");
+            // COMPLETE THE CODE
+            step += 0.03;
+
+            if (cube.position.y > 0.25 && cube.position.x < 30.2 && cube.position.x > -30.2) {   //0.25 is half of the cube height
+                cube.position.y -= 0.02;  // velocidade de queda
+                cube.position.y -= 0.002;  // gravidade
+                sceneElements.camera.position.y -= 0.022;
+            }
+            else {
+                touchGround = true;
+            }
+
+            if (cube.position.x > 30.2 || cube.position.x < -30.2 || cube.position.z > 50.2 || cube.position.z < -50.2 || cube.position.y < 0.20) {
+                cube.position.y -= 0.02;  // velocidade de queda
+                cube.position.y -= 0.002;  // gravidade
+                sceneElements.camera.position.y -= 0.022;
+
+
+            }
+
+
+            if (keyD) {
+                cube.translateX(dispX);
+                sceneElements.camera.position.x += dispX;
+                sceneElements.camera.lookAt(cube.position);
+
+            }
+            if (keyW) {
+                cube.translateZ(-dispZ);
+                sceneElements.camera.position.z -= dispZ;
+                sceneElements.camera.lookAt(cube.position);
+
+            }
+            if (keyA) {
+                cube.translateX(-dispX);
+                sceneElements.camera.position.x -= dispX;
+                sceneElements.camera.lookAt(cube.position);
+
+            }
+            if (keyS) {
+                cube.translateZ(dispZ);
+                sceneElements.camera.position.z += dispZ;
+                sceneElements.camera.lookAt(cube.position);
+
+            }
+            /*
+            if (keySpace) {
+                if (touchGround) {
+                    if (cube.position.y < 1.5) {
+                        cube.position.y += 0.1;
+                        sceneElements.camera.position.y += 0.1;
+
+
+                    }
+                }
+                if (cube.position.y >= 1.5) {
+                    touchGround = false;
+                }
+            }*/
+
+            
+
+            frames++
+            //sceneElements.camera.position.set(cube.position.x, cube.position.y + 2, cube.position.z + 5);
+            // Rendering
+            helper.render(sceneElements);
+            //sceneElements.control.update();
+            console.log(sceneElements.camera.position)
+            // Animation
+            //Call for the next frame
+            requestAnimationFrame(computeFrame);
+        }
+
+        // Call functions:
+        //  1. Initialize the empty scene
+        //  2. Add elements within the scene
+        //  3. Animate
+
+        function init() {
+            helper.initEmptyScene(sceneElements);
+            scene.load3DObjects(sceneElements.sceneGraph);
+            requestAnimationFrame(computeFrame);
+        }
+
+        // HANDLING EVENTS
+
+        // Event Listeners
+
+        window.addEventListener('resize', resizeWindow);
+
+        document.addEventListener('keydown', onDocumentKeyDown, false);
+        document.addEventListener('keyup', onDocumentKeyUp, false);
+
+        // Update render image size and camera aspect when the window is resized
+        function resizeWindow(eventParam) {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+
+            sceneElements.camera.aspect = width / height;
+            sceneElements.camera.updateProjectionMatrix();
+
+            sceneElements.renderer.setSize(width, height);
+
+            // Comment when doing animation
+            // computeFrame(sceneElements);
+        }
+
+        function onDocumentKeyDown(event) {
+            switch (event.keyCode) {
+                case 68: //d
+                    keyD = true;
+                    break;
+                case 83: //s
+                    keyS = true;
+                    break;
+                case 65: //a
+                    keyA = true;
+                    break;
+                case 87: //w
+                    keyW = true;
+                    break;
+                case 32: //space
+                    keySpace = true;
+                    break;
+            }
+        }
+
+        function onDocumentKeyUp(event) {
+            switch (event.keyCode) {
+                case 68: //d
+                    keyD = false;
+                    break;
+                case 83: //s
+                    keyS = false;
+                    break;
+                case 65: //a
+                    keyA = false;
+                    break;
+                case 87: //w
+                    keyW = false;
+                    break;
+                case 32: //space
+                    keySpace = false;
+                    touchGround = false;    // não permitir double jump só por não chegar á altura máxima
+                    break;
+            }
+        }
+
+
+        // STARTING
+
+        init();
+
+    </script>
+
+</head>
+
+<body>
+    <div id="Tag3DScene"> </div>
+</body>
+
+</html>
