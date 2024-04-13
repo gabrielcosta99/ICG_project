@@ -1,12 +1,6 @@
 <!DOCTYPE html>
 
 <html lang="en">
-<!--
-
-		J. Madeira - April 2021; Updated - March 2024
-
--->
-
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -14,7 +8,6 @@
     <title> 3D scene </title>
 
     <link rel="stylesheet" href="style.css">
-
     <script type="importmap">
         {
           "imports": {
@@ -23,12 +16,12 @@
           }
         }
       </script>
-
     <script type="module">
 
         import * as THREE from "three";
 
         import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+        import  HouseMod  from "./js/house-r0.js";
 
         // To store the scene graph, and elements usefull to rendering the scene
         const sceneElements = {
@@ -36,6 +29,7 @@
             camera: null,
             control: null,  // NEW
             renderer: null,
+            trees: [],
         };
 
         // HELPER FUNCTIONS
@@ -73,7 +67,7 @@
                 // Add point light souce (with shadows)
                 // ***************************** //
                 const light_1 = new THREE.DirectionalLight('rgb(255, 255, 255)', 1);
-                light_1.position.set(0, 10, 2);
+                light_1.position.set(0, 5, 2);
                 light_1.castShadow = true;
                 sceneElements.sceneGraph.add(light_1);
 
@@ -100,7 +94,7 @@
                 htmlElement.appendChild(renderer.domElement);
 
                 // ************************** //
-                // NEW --- Control for the camera
+                // Control for the camera
                 // ************************** //
                 //sceneElements.control = new OrbitControls(camera, renderer.domElement);
                 //sceneElements.control.screenSpacePanning = true;
@@ -113,52 +107,40 @@
 
         // FUCNTIONS FOR BUILDING THE SCENE
         function createTree(scaleY = 1) {
-
             // Creating a model by grouping basic geometries
 
             // Cylinder centered at the origin
-
             const cylinderRadius = 0.25;
-
             const cylinderHeight = 1;
-
             const cylinderGeometry = new THREE.CylinderGeometry(cylinderRadius, cylinderRadius, cylinderHeight, 32);
-
-            const redMaterial = new THREE.MeshLambertMaterial({ color: 0xff0000 });
-
+            const redMaterial = new THREE.MeshPhongMaterial({ color: 0xff0000 });
             const cylinder = new THREE.Mesh(cylinderGeometry, redMaterial);
-
             // Move base of the cylinder to y = 0
-
             cylinder.position.y = cylinderHeight / 2.0;
 
             // Cone
-
             const baseConeRadius = 0.5;
-
             const coneHeight = 1.5;
-
             const coneGeometry = new THREE.ConeGeometry(baseConeRadius, coneHeight, 32);
-
-            const greenMaterial = new THREE.MeshLambertMaterial({ color: 0x00ff00 });
-
+            const greenMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
             const cone = new THREE.Mesh(coneGeometry, greenMaterial);
-
             // Move base of the cone to the top of the cylinder
-
             cone.position.y = cylinderHeight + coneHeight / 2.0;
 
             // Tree
-
             const tree = new THREE.Group();
-
             tree.add(cylinder);
-
             tree.add(cone);
             tree.scale.set(1, scaleY)
             return tree;
         }
-
+        function createRiver(){
+            const riverGeometry = new THREE.PlaneGeometry(5, 100);
+            const riverMaterial = new THREE.MeshPhongMaterial({ color: 'rgb(0,0,255)', side: THREE.DoubleSide });
+            const riverObject = new THREE.Mesh(riverGeometry, riverMaterial);
+            riverObject.rotation.x = Math.PI / 2;
+            return riverObject
+        }
 
         const scene = {
 
@@ -174,25 +156,28 @@
                 planeObject.rotation.x = Math.PI / 2;
                 sceneGraph.add(planeObject);
 
+                // Set shadow property
+                planeObject.receiveShadow = true;
+
                 /*const planeObject2 = new THREE.Mesh(planeGeometry, planeMaterial);
                 planeObject2.rotation.x = Math.PI / 2;
                 planeObject2.position.set(0, 3, 0);
                 sceneGraph.add(planeObject2);*/
 
-                // Set shadow property
-                planeObject.receiveShadow = true;
+                
 
                 // ************************** //
                 // Create the forest
                 // ************************** //
 
-                const trees = []
-                for(let i = 0;i<20;i++){
+                //const trees = []
+                for(let i = 0;i<200;i++){
                     const tree = createTree();
                     tree.position.set((Math.random() - 0.5) * 60, 0, (Math.random() - 0.5) * 100)
                     sceneElements.sceneGraph.add(tree)
                     tree.castShadow = true
-                    trees.push(tree)
+                    tree.receiveShadow = true
+                    sceneElements.trees.push(tree)
                 }
 
                 // ************************** //
@@ -204,9 +189,33 @@
                 const cubeMaterial = new THREE.MeshPhongMaterial({ color: 'rgb(0,255,255)' });
                 const cubeObject = new THREE.Mesh(cubeGeometry, cubeMaterial);
                 cubeObject.name = "cube";
-                cubeObject.position.set(0, 0.5, 0);
+                cubeObject.position.set(0, 0.25, 0);
                 cubeObject.castShadow = true;
                 sceneGraph.add(cubeObject);
+
+                // ************************** //
+                // Add a house
+                // ************************** //
+                /*
+                const house = createHouse()
+                house.position.set(0, 0, -10)
+                sceneGraph.add(house)*/
+
+                const house = HouseMod.create()
+                house.position.set(-10, 1, -10)
+                house.castShadow = true
+                house.receiveShadow = true
+                house.name = "house"
+                sceneGraph.add(house)
+
+                // ************************** //
+                // Add a river
+                // ************************** //
+                const river = createRiver()
+                river.position.set(0, 0.01, 0)
+                river.receiveShadow = true
+                sceneGraph.add(river)
+
 
             }
         };
@@ -247,7 +256,7 @@
 
         let frames = 0
         let spawnRate = 200
-
+        let previousCubePosition = new THREE.Vector3()
         function computeFrame(time) {
 
             // Can extract an object from the scene Graph from its name
@@ -260,6 +269,7 @@
                 cube.position.y -= 0.02;  // velocidade de queda
                 cube.position.y -= 0.002;  // gravidade
                 sceneElements.camera.position.y -= 0.022;
+                //sceneElements.control.update();
             }
             else {
                 touchGround = true;
@@ -269,7 +279,7 @@
                 cube.position.y -= 0.02;  // velocidade de queda
                 cube.position.y -= 0.002;  // gravidade
                 sceneElements.camera.position.y -= 0.022;
-
+                //sceneElements.control.update();
 
             }
 
@@ -277,27 +287,49 @@
             if (keyD) {
                 cube.translateX(dispX);
                 sceneElements.camera.position.x += dispX;
-                sceneElements.camera.lookAt(cube.position);
+                //sceneElements.control.update();
+               // sceneElements.camera.lookAt(cube.position);
 
             }
             if (keyW) {
                 cube.translateZ(-dispZ);
                 sceneElements.camera.position.z -= dispZ;
-                sceneElements.camera.lookAt(cube.position);
+                //sceneElements.control.update();
+               // sceneElements.camera.lookAt(cube.position);
 
             }
             if (keyA) {
                 cube.translateX(-dispX);
                 sceneElements.camera.position.x -= dispX;
-                sceneElements.camera.lookAt(cube.position);
+                //sceneElements.control.update();
+                //sceneElements.camera.lookAt(cube.position);
 
             }
             if (keyS) {
                 cube.translateZ(dispZ);
                 sceneElements.camera.position.z += dispZ;
-                sceneElements.camera.lookAt(cube.position);
+                //sceneElements.control.update();
+                //sceneElements.camera.lookAt(cube.position);
 
             }
+            for(const tree of sceneElements.trees){
+                if(boxCollision({box1: cube, box2: tree})){
+                    /*  // FIRST IDEA
+                    const translate = cube.position.clone().sub(tree.position).normalize().multiplyScalar(0.1)
+                    cube.position.add(translate)
+                    sceneElements.camera.position.add(translate)*/
+                    // SECOND IDEA
+                    const translate = cube.position.clone().sub(previousCubePosition).normalize().multiplyScalar(0.1)
+                    console.log(previousCubePosition)
+                    console.log(cube.position)
+                    console.log(translate)
+                    tree.position.add(translate)
+                    
+
+                }
+            }
+            
+           
             /*
             if (keySpace) {
                 if (touchGround) {
@@ -314,13 +346,13 @@
             }*/
 
             
-
             frames++
+            previousCubePosition = cube.position.clone()
             //sceneElements.camera.position.set(cube.position.x, cube.position.y + 2, cube.position.z + 5);
             // Rendering
             helper.render(sceneElements);
             //sceneElements.control.update();
-            console.log(sceneElements.camera.position)
+            //console.log(sceneElements.camera.position)
             // Animation
             //Call for the next frame
             requestAnimationFrame(computeFrame);
@@ -374,9 +406,10 @@
                 case 87: //w
                     keyW = true;
                     break;
+                /*
                 case 32: //space
                     keySpace = true;
-                    break;
+                    break;*/
             }
         }
 
@@ -394,10 +427,11 @@
                 case 87: //w
                     keyW = false;
                     break;
+                /*
                 case 32: //space
                     keySpace = false;
                     touchGround = false;    // não permitir double jump só por não chegar á altura máxima
-                    break;
+                    break;*/
             }
         }
 
