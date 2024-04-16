@@ -51,7 +51,7 @@
                 const height = window.innerHeight;
                 const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 500);
                 sceneElements.camera = camera;
-                camera.position.set(5, 4, 8);
+                camera.position.set(10, 8, 16);
                 camera.lookAt(3, 0, 0);
 
                 // ************************** //
@@ -124,7 +124,7 @@
             const baseConeRadius = 0.5;
             const coneHeight = 1.5;
             const coneGeometry = new THREE.ConeGeometry(baseConeRadius, coneHeight, 32);
-            const greenMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
+            const greenMaterial = new THREE.MeshPhongMaterial({ color: 0x33cc33 });
             const cone = new THREE.Mesh(coneGeometry, greenMaterial);
             // Move base of the cone to the top of the cylinder
             cone.position.y = cylinderHeight + coneHeight / 2.0;
@@ -160,9 +160,11 @@
             return bridge;
         }
         function createMountain(){
-            const coneGeometry = new THREE.ConeGeometry(5, 15, 32);
+            const coneGeometry = new THREE.ConeGeometry(7, 15, 32);
             const coneMaterial = new THREE.MeshPhongMaterial({ color: 'rgb(139,69,19)' });
             const coneObject = new THREE.Mesh(coneGeometry, coneMaterial);
+            coneObject.castShadow = true;
+            coneObject.receiveShadow = true;
             return coneObject;
         }
 
@@ -210,7 +212,7 @@
                 // cube center is at (0,0,0)
 
                 const cubeGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
-                const cubeMaterial = new THREE.MeshPhongMaterial({ color: 'rgb(0,255,255)' });
+                const cubeMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff });
                 const cubeObject = new THREE.Mesh(cubeGeometry, cubeMaterial);
                 cubeObject.name = "cube";
                 cubeObject.position.set(3, 0.25, 0);
@@ -236,14 +238,14 @@
                 // Add a river
                 // ************************** //
                 const river = createRiver()
-                river.position.set(0, 0.002, 0)
+                river.position.set(0, 0.004, 0)
                 sceneGraph.add(river)
 
                 // ************************** //
                 // Add a road
                 // ************************** //
                 const road = createRoad()
-                road.position.set(0, 0.001, 0)
+                road.position.set(0, 0.002, 0)
                 road.receiveShadow = true
                 sceneGraph.add(road)
 
@@ -252,14 +254,14 @@
                 const lineMaterial = new THREE.MeshPhongMaterial({ color: 'rgb(255,255,255)', side: THREE.DoubleSide });
                 for(let i = 0; i < 5; i++){
                     const line1 = new THREE.Mesh(lineGeometry, lineMaterial);
-                    line1.position.set(-25+i*5, 0.002, 0);
+                    line1.position.set(-25+i*5, 0.003, 0);
                     line1.rotation.x = Math.PI / 2;
                     line1.rotation.z = Math.PI / 2;
                     sceneGraph.add(line1);
                 }
                 for (let i = 0; i < 5; i++) {
                     const line1 = new THREE.Mesh(lineGeometry, lineMaterial);
-                    line1.position.set(5 + i * 5, 0.002, 0);
+                    line1.position.set(5 + i * 5, 0.003, 0);
                     line1.rotation.x = Math.PI / 2;
                     line1.rotation.z = Math.PI / 2;
                     sceneGraph.add(line1);
@@ -280,7 +282,7 @@
                 // Add a bridge made by a tree
                 // ************************** //
                 const treeBridge = createTree(1.5,2.5)
-                treeBridge.position.set(-3, 0.5, 0)
+                treeBridge.position.set(-3, 0.3, 0)
                 treeBridge.rotation.z = -Math.PI / 2
                 treeBridge.receiveShadow = true
                 sceneGraph.add(treeBridge)
@@ -290,38 +292,42 @@
                 // ************************** //
                 const mountain1 = createMountain()
                 const mountain2 = createMountain()
+                const subMountain2 = createMountain()
                 const mountain3 = createMountain()
                 sceneGraph.add(mountain1)
                 sceneGraph.add(mountain2)
+                sceneGraph.add(subMountain2)
                 sceneGraph.add(mountain3)
 
-                mountain1.position.set(0, 7.5, -50)
-                mountain2.position.set(-25, 7.5, -25)
-                mountain3.position.set(-25, 7.5, 25)
+                mountain1.position.set(0, 7.5, -43)
+                mountain2.position.set(-23, 7.5, -25)
+                subMountain2.position.set(-25, 6, -18)
+                subMountain2.scale.set(0.7,0.8, 0.7)
+                mountain3.position.set(-23, 7.5, 25)
                 mountain1.receiveShadow = true
 
             }
         };
 
         // COLLISION DETECTION
-        function boxCollision({ box1, box2 }) {
-            const box1Right = box1.position.x + 0.5 / 2
-            const box1Left = box1.position.x - 0.5 / 2
-            //const box1Top = box1.position.y + 0.5 / 2
-            //const box1Bottom = box1.position.y - 0.5 / 2
-            const box1Front = box1.position.z + 0.5 / 2
-            const box1Back = box1.position.z - 0.5 / 2
+        function collision({ element1, element2 }) {
+            const element1Right = element1.position.x + 0.5 / 2
+            const element1Left = element1.position.x - 0.5 / 2
+            //const element1Top = element1.position.y + 0.5 / 2
+            //const element1Bottom = element1.position.y - 0.5 / 2
+            const element1Front = element1.position.z + 0.5 / 2
+            const element1Back = element1.position.z - 0.5 / 2
 
-            const box2Right = box2.position.x + 0.5 / 2
-            const box2Left = box2.position.x - 0.5 / 2
-            //const box2Top = box2.position.y + 0.5 / 2
-            //const box2Bottom = box2.position.y - 0.5 / 2
-            const box2Front = box2.position.z + 0.5 / 2
-            const box2Back = box2.position.z - 0.5 / 2
+            const element2Right = element2.position.x + 0.5 / 2
+            const element2Left = element2.position.x - 0.5 / 2
+            //const element2Top = element2.position.y + 0.5 / 2
+            //const element2Bottom = element2.position.y - 0.5 / 2
+            const element2Front = element2.position.z + 0.5 / 2
+            const element2Back = element2.position.z - 0.5 / 2
 
-            const xCollision = box1Right >= box2Left && box1Left <= box2Right
-            //const yCollision = box1Bottom + 0.02 <= box2Top && box1Top >= box2Bottom
-            const zCollision = box1Front >= box2Back && box1Back <= box2Front
+            const xCollision = element1Right >= element2Left && element1Left <= element2Right
+            //const yCollision = element1Bottom + 0.02 <= element2Top && element1Top >= element2Bottom
+            const zCollision = element1Front >= element2Back && element1Back <= element2Front
             return xCollision  && zCollision
         }
 
@@ -348,7 +354,8 @@
         var touchGround = false;
 
         // To keep track of the keyboard - WASD
-        var keyD = false, keyA = false, keyS = false, keyW = false, keySpace = false;
+        var keyD = false, keyA = false, keyS = false, keyW = false, keyQ=false, keySpace = false;
+        var toggledCamera=false;
         var step = 0;
 
         let frames = 0
@@ -384,63 +391,78 @@
 
             }
             // if in the river, the cube moves slower and gets pushed back
-            if (inRiver()) {
+            if (inRiver() && cube.position.z < 50) {
                 cube.position.z += 0.03;
                 dispX = 0.03;
-                //sceneElements.camera.position.z += 0.03;
+                if(toggledCamera){
+                    sceneElements.camera.position.z += 0.03;
+                }
             }
             else{
                 dispX = 0.05;
             }
 
 
-            if (keyD) {
+            if (keyD && cube.position.x < 30) {
                 cube.translateX(dispX);
-                //sceneElements.camera.position.x += dispX;
+                if(toggledCamera){
+                    sceneElements.camera.position.x += dispX;
+                    sceneElements.camera.lookAt(cube.position);
+                }
+
 
                 //sceneElements.control.update();
-               // sceneElements.camera.lookAt(cube.position);
 
             }
-            if (keyW) {
+            if (keyW && cube.position.z > -50) {
                 cube.translateZ(-dispZ);
-                //sceneElements.camera.position.z -= dispZ;
+                if (toggledCamera) {
+                    sceneElements.camera.position.z -= dispZ;
+                     sceneElements.camera.lookAt(cube.position);
+                }
                 //sceneElements.control.update();
-               // sceneElements.camera.lookAt(cube.position);
 
             }
-            if (keyA) {
+            if (keyA && cube.position.x > -30) {
                 cube.translateX(-dispX);
+                if (toggledCamera) {
+                    sceneElements.camera.position.x -= dispX;
+                    sceneElements.camera.lookAt(cube.position);
+                }
                 //sceneElements.camera.position.x -= dispX;
 
                 //sceneElements.control.update();
                 //sceneElements.camera.lookAt(cube.position);
 
             }
-            if (keyS) {
+            if (keyS && cube.position.z < 50) {
                 cube.translateZ(dispZ);
-                //sceneElements.camera.position.z += dispZ;
-
+                if (toggledCamera) {
+                    sceneElements.camera.position.z += dispZ;
+                    sceneElements.camera.lookAt(cube.position);
+                }
                 //sceneElements.control.update();
-                //sceneElements.camera.lookAt(cube.position);
-
             }
             for(const tree of sceneElements.trees){
                 // let the trees be pushed by the cube
-                if(boxCollision({box1: cube, box2: tree})){
+                if(collision({element1: cube, element2: tree})){
                     /*  // FIRST IDEA
                     const translate = cube.position.clone().sub(tree.position).normalize().multiplyScalar(0.1)
                     cube.position.add(translate)
                     sceneElements.camera.position.add(translate)*/
                     // SECOND IDEA
-                    const translate = cube.position.clone().sub(previousCubePosition).normalize().multiplyScalar(0.1)
-                    console.log(previousCubePosition)
-                    console.log(cube.position)
-                    console.log(translate)
-                    tree.position.add(translate)
+                    if(tree.position.x > -30 && tree.position.x < 30 && tree.position.z > -50 && tree.position.z < 50){
+                        const translate = cube.position.clone().sub(previousCubePosition).normalize().multiplyScalar(0.1)
+                        //const translate = new THREE.Vector3(dispX*keyD - dispX*keyA, 0, dispZ*keyS - dispZ*keyW)
+                        console.log(previousCubePosition)
+                        console.log(cube.position)
+                        console.log(translate)
+                        tree.position.add(translate)
+                    }
+                    
                 }
                 // let the river carry the trees
-                if(tree.position.x > -2.5 && tree.position.x < 2.5){
+                if(tree.position.x > -2.5 && tree.position.x < 2.5 && tree.position.z > -50 && tree.position.z < 50){
                     tree.position.z += 0.03;
                 }
             }
@@ -453,8 +475,6 @@
                     if (cube.position.y < 1.5) {
                         cube.position.y += 0.1;
                         sceneElements.camera.position.y += 0.1;
-
-
                     }
                 }
                 if (cube.position.y >= 1.5) {
@@ -524,10 +544,36 @@
                 case 87: //w
                     keyW = true;
                     break;
+                case 81:    //q
+                    keyQ = true;
+                    toggledCamera = !toggledCamera;
+                    if (toggledCamera){
+                        console.log("here")
+                        const cubePos = sceneElements.sceneGraph.getObjectByName("cube").position;
+                        sceneElements.camera.position.set(cubePos.x+3, cubePos.y + 2, cubePos.z + 5);
+                        sceneElements.camera.lookAt(cubePos);
+                        //erase orbitcontrols
+                        sceneElements.control.dispose();
+                        sceneElements.controls.enabled = false; // This will prevent the controls from updating
+
+                    } 
+                    else {
+
+                        sceneElements.camera.position.set(10, 8, 16);
+                        sceneElements.camera.lookAt(0, 0, 0);
+                        sceneElements.control = new OrbitControls(sceneElements.camera,sceneElements.renderer.domElement);
+                        sceneElements.control.screenSpacePanning = true;
+
+                    }
+                    
+                    break;
+                
                 /*
                 case 32: //space
                     keySpace = true;
                     break;*/
+                
+                
             }
         }
 
@@ -544,6 +590,9 @@
                     break;
                 case 87: //w
                     keyW = false;
+                    break;
+                case 81:    //q
+                    keyQ = false;
                     break;
                 /*
                 case 32: //space

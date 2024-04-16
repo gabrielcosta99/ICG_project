@@ -1,0 +1,1 @@
+house -> https://github.com/dustinpfister/test_threejs/blob/master/views/forpost/threejs-examples-house/js/house-r0.js
