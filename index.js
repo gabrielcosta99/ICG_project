@@ -226,7 +226,7 @@ const scene = {
         sceneGraph.add(house)*/
 
         const house = HouseMod.create()
-        house.position.set(-25, 1, -35)
+        house.position.set(-20, 1, -35)
         house.rotation.y = Math.PI / 2
         house.castShadow = true
         house.receiveShadow = true
@@ -265,7 +265,7 @@ const scene = {
         const waterfallGeometry = new THREE.BoxGeometry(5, 40,0.5);
         const waterfallMaterial= new THREE.MeshPhongMaterial({ color: 'rgb(0,0,255)', side: THREE.DoubleSide });
         const waterfall = new THREE.Mesh(waterfallGeometry, waterfallMaterial)
-        waterfall.position.set(0, -20, 50.25);
+        waterfall.position.set(0, -19.996, 50.25);
         sceneGraph.add(waterfall);
        
         // ************************** //
@@ -564,7 +564,7 @@ function computeFrame(time) {
             cube.position.add(translate)
             sceneElements.camera.position.add(translate)*/
             // SECOND IDEA
-            /*
+            
             if (tree.position.x > -30 && tree.position.x < 30 && tree.position.z > -50 && tree.position.z < 50) {
                 const translate = cube.position.clone().sub(previousCubePosition).normalize().multiplyScalar(0.1)
                 //const translate = new THREE.Vector3(dispX*keyD - dispX*keyA, 0, dispZ*keyS - dispZ*keyW)
@@ -573,7 +573,7 @@ function computeFrame(time) {
                 console.log(translate)
                 tree.position.add(translate)
             }
-            */
+            
 
         }
         // let the river carry the trees
