@@ -15,6 +15,7 @@ const sceneElements = {
 };
 const loader = new GLTFLoader();
 const mixer = new THREE.AnimationMixer();
+const textureLoader = new THREE.TextureLoader();
 
 // HELPER FUNCTIONS
 
@@ -44,16 +45,16 @@ const helper = {
         sceneElements.sceneGraph.add(ambientLight);
 
         // ***************************** //
-        // Add point light souce (with shadows)
+        // Add point light souce (sun) with shadows
         // ***************************** //
-        const light_1 = new THREE.PointLight('rgb(255, 255, 255)', 5000);
-        light_1.position.set(60, 20, 0);
-        light_1.shadow.mapSize.width = 4000;
-        light_1.shadow.mapSize.height = 4000;
-        light_1.castShadow = true;
-        light_1.name = "light 1";
-        sceneElements.sceneGraph.add(light_1);
-
+        
+        const sun = new THREE.PointLight('rgb(255, 255, 255)', 5000);
+        sun.position.set(60, 20, 0);
+        sun.shadow.mapSize.width = 4000;
+        sun.shadow.mapSize.height = 4000;
+        sun.castShadow = true;
+        sun.name = "sun";
+        sceneElements.sceneGraph.add(sun);        
 
 
 
@@ -122,9 +123,29 @@ function createTree(scaleX = 1, scaleY = 1, scaleZ = 1) {
     return tree;
 }
 
+let riverTexture;
 function createRiver() {
-    const riverGeometry = new THREE.PlaneGeometry(5, 100);
-    const riverMaterial = new THREE.MeshPhongMaterial({ color: 'rgb(0,0,255)', side: THREE.DoubleSide });
+    const riverGeometry = new THREE.PlaneGeometry(5, 101);
+    //const waterTexture = textureLoader.load('./textures/Water_1_M_Normal.jpg');
+    //const waterNormalMap = textureLoader.load('./textures/Water_2_M_Normal.jpg');
+    const waterTexture = textureLoader.load('./textures/Water_2_M_Normal.jpg');
+
+    // Adjust the repeat factor to control the tiling of the texture
+    //waterTexture.repeat.set(6, 100); // Adjust as needed
+
+    // Adjust the repeat factor to control the tiling of the texture
+    waterTexture.repeat.set(4, 40); // Adjust as needed
+    riverTexture = waterTexture;
+    // Adjust the wrap mode to repeat the texture
+    waterTexture.wrapS = THREE.RepeatWrapping;
+    waterTexture.wrapT = THREE.RepeatWrapping;
+
+    const riverMaterial = new THREE.MeshPhongMaterial({
+        map: waterTexture,
+        //normalMap: waterNormalMap,
+        side: THREE.DoubleSide,
+    });
+    //const riverMaterial = new THREE.MeshPhongMaterial({ color: 'rgb(0,0,255)', side: THREE.DoubleSide });
     const riverObject = new THREE.Mesh(riverGeometry, riverMaterial);
     riverObject.rotation.x = Math.PI / 2;
     return riverObject
@@ -143,8 +164,17 @@ function createBridge() {
     return bridge;
 }
 function createMountain() {
+    const mountainTexture = textureLoader.load('./textures/mountain.jpg');
+
+    // Adjust the repeat factor to control the tiling of the texture
+    mountainTexture.repeat.set(4, 4); // Adjust as needed
+
+    // Adjust the wrap mode to repeat the texture
+    mountainTexture.wrapS = THREE.RepeatWrapping;
+    mountainTexture.wrapT = THREE.RepeatWrapping;
+
     const coneGeometry = new THREE.ConeGeometry(7, 15, 32);
-    const coneMaterial = new THREE.MeshPhongMaterial({ color: 'rgb(139,69,19)' });
+    const coneMaterial = new THREE.MeshPhongMaterial({ map: mountainTexture });
     const coneObject = new THREE.Mesh(coneGeometry, coneMaterial);
     coneObject.castShadow = true;
     coneObject.receiveShadow = true;
@@ -161,8 +191,21 @@ const scene = {
         // ************************** //
         // Create the ground
         // ************************** //
+        // Load a texture
+        const groundTexture = textureLoader.load('./textures/grass.avif');
+
+        // Adjust the repeat factor to control the tiling of the texture
+        groundTexture.repeat.set(6, 10); // Adjust as needed
+
+        // Adjust the wrap mode to repeat the texture
+        groundTexture.wrapS = THREE.RepeatWrapping;
+        groundTexture.wrapT = THREE.RepeatWrapping;
+        //
+        
         const groundGeometry = new THREE.BoxGeometry(60, 100,2);
-        const groundMaterial = new THREE.MeshPhongMaterial({ color: 'rgb(0,255,0)', side: THREE.DoubleSide });
+        const groundMaterial = new THREE.MeshPhongMaterial({ map: groundTexture });
+        
+        //const groundMaterial = new THREE.MeshPhongMaterial({ color: 'rgb(0,255,0)', side: THREE.DoubleSide });
         const groundObject = new THREE.Mesh(groundGeometry, groundMaterial);
         groundObject.position.set(0, -1, 0);
         groundObject.rotation.x = Math.PI / 2;
@@ -225,21 +268,21 @@ const scene = {
         house.position.set(0, 0, -10)
         sceneGraph.add(house)*/
 
-        const house = HouseMod.create()
-        house.position.set(-20, 1, -35)
-        house.rotation.y = Math.PI / 2
-        house.castShadow = true
-        house.receiveShadow = true
-        house.name = "house"
-        sceneGraph.add(house)
+        const house = HouseMod.create();
+        house.position.set(-20, 1, -35);
+        house.rotation.y = Math.PI / 2;
+        house.castShadow = true;
+        house.receiveShadow = true;
+        house.name = "house";
+        sceneGraph.add(house);
 
         // ************************** //
         // Add a river
         // ************************** //
-        const river = createRiver()
-        river.position.set(0, 0.004, 0)
+        const river = createRiver();
+        river.position.set(0, 0.006, 0);
         river.name = "river";
-        sceneGraph.add(river)
+        sceneGraph.add(river);
 
         /*
         // ************************** //
@@ -263,9 +306,11 @@ const scene = {
         // Add a waterfall
         // ************************** //
         const waterfallGeometry = new THREE.BoxGeometry(5, 40,0.5);
-        const waterfallMaterial= new THREE.MeshPhongMaterial({ color: 'rgb(0,0,255)', side: THREE.DoubleSide });
+        const waterfallMaterial = new THREE.MeshPhongMaterial({ map: riverTexture });
+        //const waterfallMaterial= new THREE.MeshPhongMaterial({ color: 'rgb(0,0,255)', side: THREE.DoubleSide });
         const waterfall = new THREE.Mesh(waterfallGeometry, waterfallMaterial)
-        waterfall.position.set(0, -19.996, 50.25);
+        waterfall.position.set(0, -19.995, 50.25);
+        waterfall.rotation.x = Math.PI;
         sceneGraph.add(waterfall);
        
         // ************************** //
@@ -476,14 +521,26 @@ let previousCubePosition = new THREE.Vector3()
 function computeFrame(time) {
 
     // Can extract an object from the scene Graph from its name
-    const light_1 = sceneElements.sceneGraph.getObjectByName("light 1");
+    
+    const sun = sceneElements.sceneGraph.getObjectByName("sun");
     // rotate the light around the plane
-    light_1.position.x = 60 * Math.cos(step * 0.02);
-    light_1.position.y = 60 * Math.sin(step * 0.02);
+    sun.position.x = 60 * Math.cos(step * 0.1);
+    sun.position.y = 60 * Math.sin(step * 0.1);
 
+    if(sun.position.y < 0){     // nighttime
+        sun.intensity = 0;
+        sceneElements.renderer.setClearColor('rgb(0, 0, 0)', 1.0);
+    }
+    else{   // daytime
+        sun.intensity = 5000;
+        sceneElements.renderer.setClearColor('rgb(0, 255, 255)', 1.0);
+    }
+
+
+    //animate the river
+    riverTexture.offset.y -= 0.012;
 
     const cube = sceneElements.sceneGraph.getObjectByName("cube");
-
     // fall from the platform
     if (cube.position.y > 0.25 && cube.position.x < 30.2 && cube.position.x > -30.2) {   //0.25 is half of the cube height
         cube.position.y -= 0.02;  // velocidade de queda
