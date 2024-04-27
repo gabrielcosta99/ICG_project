@@ -158,9 +158,80 @@ function createRoad() {
     return roadObject
 }
 function createBridge() {
+    // create planks
+    const plankGeometry = new THREE.BoxGeometry(1, 0.1, 3);
+    const plankMaterial = new THREE.MeshPhongMaterial({ color: 'rgb(139,69,19)' });
+    const plank1 = new THREE.Mesh(plankGeometry, plankMaterial);
+    const plank2 = new THREE.Mesh(plankGeometry, plankMaterial);
+    const plank3 = new THREE.Mesh(plankGeometry, plankMaterial);
+
+    plank1.position.set(-1.5, 0.05, 0);
+    plank2.position.set(0, 0.05, 0);
+    plank3.position.set(1.5, 0.05, 0);
+
+    // add structure to planks
+    const structureGeometry = new THREE.BoxGeometry(0.1, 0.2, 5);
+    const structureMaterial = new THREE.MeshPhongMaterial({ color: 'rgb(139,69,19)' });
+    const structure1 = new THREE.Mesh(structureGeometry, structureMaterial);
+    const structure2 = new THREE.Mesh(structureGeometry, structureMaterial);
+    const structure3 = new THREE.Mesh(structureGeometry, structureMaterial);
+    const structure4 = new THREE.Mesh(structureGeometry, structureMaterial);
+    const structure5 = new THREE.Mesh(structureGeometry, structureMaterial);
+    const structure6 = new THREE.Mesh(structureGeometry, structureMaterial);
+
+    structure1.rotation.y = Math.PI / 2;
+    structure2.rotation.y = Math.PI / 2;
+    structure3.rotation.y = Math.PI / 2;
+    structure4.rotation.y = Math.PI / 2;
+    structure5.rotation.y = Math.PI / 2;
+    structure6.rotation.y = Math.PI / 2;
+
+    structure1.position.set(0, 0.15, 1.5);
+    structure2.position.set(0, 0.15, -1.5);
+    structure3.position.set(0, 0.8, 1.5);
+    structure4.position.set(0, 0.8, -1.5);
+    structure5.position.set(0, 1.5, 1.5);
+    structure6.position.set(0, 1.5, -1.5);
+
+    // add aditional support
+    const supportGeometry = new THREE.CylinderGeometry(0.2, 0.2, 3, 32);
+    const supportMaterial = new THREE.MeshPhongMaterial({ color: 'rgb(139,69,19)' });
+    const support1 = new THREE.Mesh(supportGeometry, supportMaterial);
+    const support2 = new THREE.Mesh(supportGeometry, supportMaterial);
+    const support3 = new THREE.Mesh(supportGeometry, supportMaterial);
+    const support4 = new THREE.Mesh(supportGeometry, supportMaterial);
+
+    support1.position.set(-2.5, 0.25, -1.5);
+    support2.position.set(-2.5, 0.25, 1.5);
+    support3.position.set(2.5, 0.25, -1.5);
+    support4.position.set(2.5, 0.25, 1.5);
+
+
+
+
+
+    // create bridge
+    const bridge = new THREE.Group();
+    bridge.add(plank1);
+    bridge.add(plank2);
+    bridge.add(plank3);
+    bridge.add(structure1);
+    bridge.add(structure2);
+    bridge.add(structure3);
+    bridge.add(structure4);
+    bridge.add(structure5);
+    bridge.add(structure6);
+    bridge.add(support1);
+    bridge.add(support2);
+    bridge.add(support3);
+    bridge.add(support4);
+    bridge.receiveShadow = true;
+
+    /*
     const bridgeGeometry = new THREE.BoxGeometry(5.2, 1, 2); // Adjust dimensions as needed
     const bridgeMaterial = new THREE.MeshBasicMaterial({ color: 0x8B4513 });
     const bridge = new THREE.Mesh(bridgeGeometry, bridgeMaterial);
+    */
     return bridge;
 }
 function createMountain() {
@@ -398,7 +469,7 @@ const scene = {
             }
 
 
-        /*
+        
         // ************************** //
         // Add a bridge
         // ************************** //
@@ -406,16 +477,18 @@ const scene = {
         bridge.position.set(0, 0.003, 0)
         bridge.receiveShadow = true
         sceneGraph.add(bridge)
-        */
+        
 
         // ************************** //
         // Add a bridge made by a tree
         // ************************** //
+        /*
         const treeBridge = createTree(1.5, 2.5)
         treeBridge.position.set(-3, 0.3, 0)
         treeBridge.rotation.z = -Math.PI / 2
         treeBridge.receiveShadow = true
         sceneGraph.add(treeBridge)
+        */
 
         // ************************** //
         // Add mountains
@@ -501,7 +574,21 @@ function inRiver() {
     const riverLeft = -2.5
 
     const xCollision = cubeRight >= riverLeft && cubeLeft <= riverRight
-    return xCollision
+    return xCollision && cube.position.z < 50
+}
+
+function inBridge(){    // check if the cube is in the bridge
+    // we only need to check the z-axis because the "inRiver" function already checks the x-axis
+   
+    const cube = sceneElements.sceneGraph.getObjectByName("cube");
+    const cubeFront = cube.position.z + 0.5 / 2
+    const cubeBack = cube.position.z - 0.5 / 2
+
+    const bridgeFront = 1.5
+    const bridgeBack = -1.5
+
+    const zCollision = cubeFront >= bridgeBack && cubeBack <= bridgeFront
+    return zCollision && cube.position.z < 50
 }
 
 // ANIMATION
@@ -526,7 +613,23 @@ function computeFrame(time) {
     // rotate the light around the plane
     sun.position.x = 60 * Math.cos(step * 0.1);
     sun.position.y = 60 * Math.sin(step * 0.1);
-
+    
+    // day and night cycle
+    if(sun.position.y >-2  && sun.position.y < 5){
+        sun.intensity -= 20;
+        const color = Math.round(55 + 40 * sun.position.y);
+        sceneElements.renderer.setClearColor(`rgb(0, ${color}, ${color})`, 1.0);
+    }
+    else if(sun.position.y == -2){    // nighttime
+        
+        sun.intensity = 0;
+        sceneElements.renderer.setClearColor('rgb(0, 0, 0)', 1.0);
+    }
+    else if(sun.position.y>=5){   // daytime
+        sun.intensity = 5000;
+        sceneElements.renderer.setClearColor('rgb(0, 255, 255)', 1.0);
+    }
+    /*
     if(sun.position.y < 0){     // nighttime
         sun.intensity = 0;
         sceneElements.renderer.setClearColor('rgb(0, 0, 0)', 1.0);
@@ -534,13 +637,14 @@ function computeFrame(time) {
     else{   // daytime
         sun.intensity = 5000;
         sceneElements.renderer.setClearColor('rgb(0, 255, 255)', 1.0);
-    }
+    }*/
 
 
     //animate the river
     riverTexture.offset.y -= 0.012;
 
     const cube = sceneElements.sceneGraph.getObjectByName("cube");
+    
     // fall from the platform
     if (cube.position.y > 0.25 && cube.position.x < 30.2 && cube.position.x > -30.2) {   //0.25 is half of the cube height
         cube.position.y -= 0.02;  // velocidade de queda
@@ -561,7 +665,7 @@ function computeFrame(time) {
 
     }
     // if in the river, the cube moves slower and gets pushed back
-    if (inRiver() && cube.position.z < 50) {
+    if (inRiver() && !inBridge()) {    // if the cube is in the river and not in the bridge
         cube.position.z += 0.03;
         dispX = 0.03;
         if (toggledCamera) {
@@ -634,7 +738,7 @@ function computeFrame(time) {
 
         }
         // let the river carry the trees
-        if (tree.position.x > -2.5 && tree.position.x < 2.5 && tree.position.z > -50 && tree.position.z < 50) {
+        if (tree.position.x > -2.5 && tree.position.x < 2.5 && ((tree.position.z > -50 && tree.position.z<-1.9) || (tree.position.z < 50 && tree.position.z > 1.9))) {
             tree.position.z += 0.03;
         }
     }
@@ -647,9 +751,7 @@ function computeFrame(time) {
         //if (birds.position.z > 2.5 || birds.position.z < -2.5) {
             birds.rotation.y = Math.PI / 2 + Math.atan2(birds.position.x, birds.position.z);
         //}
-
         birds.position.y = 5 + 2 * Math.sin(step * 0.2);
-
     }
 
     const butterfly = sceneElements.sceneGraph.getObjectByName("butterfly");
@@ -757,7 +859,7 @@ function onDocumentKeyDown(event) {
             }
 
             break;
-
+        
         /*
         case 32: //space
             keySpace = true;
