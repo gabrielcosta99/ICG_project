@@ -24,7 +24,6 @@ const textureLoader = new THREE.TextureLoader();
 const scene = {
 
     // Create and insert in the scene graph the models of the 3D scene
-
     load3DObjects: function (sceneGraph) {
 
 
@@ -52,7 +51,7 @@ const scene = {
         // ************************** //
         // Add another platform
         // ************************** //
-        // Load a texture
+        /*
         const platform = new THREE.BoxGeometry(60, 100, 2);
         const platformMaterial = new THREE.MeshPhongMaterial({ map: groundTexture });
 
@@ -64,7 +63,7 @@ const scene = {
         sceneGraph.add(platformObject);
         // Set shadow property
         platformObject.receiveShadow = true;
-        
+        */
         
 
         // ************************** //
@@ -109,10 +108,6 @@ const scene = {
         // ************************** //
         // Add a house
         // ************************** //
-        /*
-        const house = createHouse()
-        house.position.set(0, 0, -10)
-        sceneGraph.add(house)*/
 
         const house = HouseMod.create();
         house.position.set(-20, 1, -35);
@@ -186,45 +181,6 @@ const scene = {
             sceneGraph.add(line1);
         }
 
-        // ************************** //
-        // Add trees
-        // ************************** //
-        /*
-        // Define bounds for tree placement
-        const treeBounds = {
-            minX: -25, // Adjust as needed
-            maxX: 25,  // Adjust as needed
-            minZ: -45, // Adjust as needed
-            maxZ: 45   // Adjust as needed
-        };
-
-        // Loop to create trees
-        for (let i = 0; i < 100; i++) {
-            let treePosition;
-            do {
-                // Generate a random position within the bounds
-                const x = THREE.MathUtils.randFloat(treeBounds.minX, treeBounds.maxX);
-                const z = THREE.MathUtils.randFloat(treeBounds.minZ, treeBounds.maxZ);
-                treePosition = new THREE.Vector3(x, 0, z);
-            } while (isPositionOccupied(treePosition)); // Check if the position is occupied by road or river
-            const tree = createTree();
-            tree.position.copy(treePosition);
-            sceneElements.sceneGraph.add(tree);
-            sceneElements.trees.push(tree);
-        }
-
-        // Function to check if a position is occupied by road or river
-        function isPositionOccupied(position) {
-            // Check if the position is within the bounds of the road or the river
-            const road = sceneElements.sceneGraph.getObjectByName("road");
-            const river = sceneElements.sceneGraph.getObjectByName("river");
-            const roadBounds = new THREE.Box3().setFromObject(road);
-            const riverBounds = new THREE.Box3().setFromObject(river);
-            console.log(riverBounds,roadBounds)
-            const occupied = roadBounds.containsPoint(position) || riverBounds.containsPoint(position);
-            console.log("Occupied position: ", position);
-            return occupied;
-        }*/
         // add trees along the side of the road
         for (let z = 0; z < 7; z++)
             for (let x = -4; x < 5; x++) {
@@ -253,17 +209,6 @@ const scene = {
         bridge.receiveShadow = true
         sceneGraph.add(bridge)
         
-
-        // ************************** //
-        // Add a bridge made by a tree
-        // ************************** //
-        /*
-        const treeBridge = createTree(1.5, 2.5)
-        treeBridge.position.set(-3, 0.3, 0)
-        treeBridge.rotation.z = -Math.PI / 2
-        treeBridge.receiveShadow = true
-        sceneGraph.add(treeBridge)
-        */
 
         // ************************** //
         // Add mountains
@@ -312,7 +257,7 @@ const scene = {
             sceneGraph.add(flower);
         });
 
-    }
+    },    
 };
 
 
@@ -397,7 +342,7 @@ let frames = 0
 let previousCubePosition = new THREE.Vector3()
 function computeFrame(time) {
 
-    
+    /*
     const sun = sceneElements.sceneGraph.getObjectByName("sun");
     // rotate the light around the plane
     sun.position.x = 60 * Math.cos(step * 0.1);
@@ -427,13 +372,31 @@ function computeFrame(time) {
         sun.intensity = 5000;
         sceneElements.renderer.setClearColor('rgb(0, 255, 255)', 1.0);
     }*/
-
+   
 
     //animate the river
     riverTexture.offset.y -= 0.012;
 
     const cube = sceneElements.sceneGraph.getObjectByName("cube");
-    
+    // next platform teleport
+    /*
+    if (cube.position.x > 30.2) {
+        sceneElements.sceneGraph.remove.apply(sceneElements.sceneGraph, sceneElements.sceneGraph.children);
+        scene.loadObjects(sceneElements.sceneGraph);
+
+        // the cube has been updated, so we need to get it again
+        const cube = sceneElements.sceneGraph.getObjectByName("cube");
+        if(toggledCamera){
+            const cubePos = cube.position;
+            sceneElements.camera.position.set(cubePos.x + 3, cubePos.y + 2, cubePos.z + 5);
+            sceneElements.camera.lookAt(cubePos);
+            
+        }
+        //sceneElements.camera.position.set(cubePos.x + 3, cubePos.y + 2, cubePos.z + 5);
+        //sceneElements.camera.lookAt(cube.position);
+    }*/
+
+
     // fall from the platform
     /*
     if (cube.position.y > 0.25 && cube.position.x < 30.2 && cube.position.x > -30.2) {   //0.25 is half of the cube height
@@ -467,10 +430,9 @@ function computeFrame(time) {
     }
 
 
-    
 
 
-    if (inBridge() && (cube.position.z <-1.2 || cube.position.z))     // if the cube is in the bridge
+    if (inBridge() && (cube.position.z <-1.2 || cube.position.z>1.5))     // if the cube is in the bridge
         keyW = false
     if (keyW && cube.position.z > -50 ) {
         cube.translateZ(-dispZ);
@@ -490,7 +452,7 @@ function computeFrame(time) {
         //sceneElements.control.update();
         //sceneElements.camera.lookAt(cube.position);
     }
-    if(inBridge() && cube.position.z >1.2)
+    if(inBridge() && (cube.position.z >1.2 || cube.position.z<-1.5))
         keyS = false
     if (keyS && cube.position.z < 50 ) {
         cube.translateZ(dispZ);
@@ -534,29 +496,6 @@ function computeFrame(time) {
             tree.position.z += 0.03;
         }
     }
-
-    // next platform teleport
-    if (cube.position.x > 30.2) {
-
-        const cubePos = cube.position;
-        sceneElements.camera.position.set(cubePos.x + 3, cubePos.y + 2, cubePos.z + 5);
-        //sceneElements.camera.lookAt(cube.position);
-    }
-    
-    /*
-    if(cube.position.x > 30.2){
-        
-        cube.position.set(-30, 60.25, 0);
-        const cubePos = cube.position;
-        sceneElements.camera.position.set(cubePos.x + 3, cubePos.y + 2, cubePos.z + 5);
-        //sceneElements.camera.lookAt(cube.position);
-    }
-    if(cube.position.x < -30.2){
-        cube.position.set(30, 60.25, 0);
-        const cubePos = cube.position;
-        sceneElements.camera.position.set(cubePos.x + 3, cubePos.y + 2, cubePos.z + 5);
-        //sceneElements.camera.lookAt(cube.position);
-    }*/
 
 
     // animate the birds
@@ -723,6 +662,9 @@ function onDocumentKeyUp(event) {
 // STARTING
 
 init();
+// REMOVE ALL ELEMENTS
+// sceneElements.sceneGraph.remove.apply(sceneElements.sceneGraph, sceneElements.sceneGraph.children);
+
 /* 
 // delete road (for example)
 const road = sceneElements.sceneGraph.getObjectByName("road");
