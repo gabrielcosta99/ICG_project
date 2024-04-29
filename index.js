@@ -462,7 +462,7 @@ function computeFrame(time) {
         }
         //sceneElements.control.update();
     }
-    if (keyD && cube.position.x < 90) {
+    if (keyD && cube.position.x < 30) {
         cube.translateX(dispX);
         if (toggledCamera) {
             sceneElements.camera.position.x += dispX;
