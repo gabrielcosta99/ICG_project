@@ -21,8 +21,6 @@ const mixer = new THREE.AnimationMixer();
 const textureLoader = new THREE.TextureLoader();
 
 
-
-
 const scene = {
 
     // Create and insert in the scene graph the models of the 3D scene
@@ -35,18 +33,14 @@ const scene = {
         // ************************** //
         // Load a texture
         const groundTexture = textureLoader.load('./textures/grass.avif');
-
         // Adjust the repeat factor to control the tiling of the texture
         groundTexture.repeat.set(6, 10); // Adjust as needed
-
         // Adjust the wrap mode to repeat the texture
         groundTexture.wrapS = THREE.RepeatWrapping;
         groundTexture.wrapT = THREE.RepeatWrapping;
-        //
-        
+     
         const groundGeometry = new THREE.BoxGeometry(60, 100,2);
         const groundMaterial = new THREE.MeshPhongMaterial({ map: groundTexture });
-        
         //const groundMaterial = new THREE.MeshPhongMaterial({ color: 'rgb(0,255,0)', side: THREE.DoubleSide });
         const groundObject = new THREE.Mesh(groundGeometry, groundMaterial);
         groundObject.position.set(0, -1, 0);
@@ -54,12 +48,22 @@ const scene = {
         sceneGraph.add(groundObject);
         // Set shadow property
         groundObject.receiveShadow = true;
-
-        // ************************** //
-        // Create the forest
-        // ************************** //
-        //const trees = []
         
+        // ************************** //
+        // Add another platform
+        // ************************** //
+        // Load a texture
+        const platform = new THREE.BoxGeometry(60, 100, 2);
+        const platformMaterial = new THREE.MeshPhongMaterial({ map: groundTexture });
+
+        //const platformMaterial = new THREE.MeshPhongMaterial({ color: 'rgb(0,255,0)', side: THREE.DoubleSide });
+        const platformObject = new THREE.Mesh(platform, platformMaterial);
+        //platformObject.position.set(0, 59, 0);
+        platformObject.position.set(60, -1, 0);
+        platformObject.rotation.x = Math.PI / 2;
+        sceneGraph.add(platformObject);
+        // Set shadow property
+        platformObject.receiveShadow = true;
         
         
 
@@ -311,6 +315,11 @@ const scene = {
     }
 };
 
+
+
+
+
+
 // COLLISION DETECTION
 function collision({ element1, element2 }) {
     const element1Right = element1.position.x + 0.5 / 2
@@ -356,8 +365,22 @@ function inBridge(){    // check if the cube is in the bridge
     const bridgeBack = -1.5
 
     const zCollision = cubeFront >= bridgeBack && cubeBack <= bridgeFront
-    return zCollision && cube.position.z < 50
+    return zCollision && cube.position.x>=-2.8 && cube.position.x<=2.8
 }
+
+function makeAllElementsInvisible() {
+    sceneGraph.traverse(function (object) {
+        if (object instanceof THREE.Mesh) {
+            object.visible = false;
+        }
+    });
+}
+
+
+
+
+
+
 
 // ANIMATION
 
@@ -374,7 +397,6 @@ let frames = 0
 let previousCubePosition = new THREE.Vector3()
 function computeFrame(time) {
 
-    // Can extract an object from the scene Graph from its name
     
     const sun = sceneElements.sceneGraph.getObjectByName("sun");
     // rotate the light around the plane
@@ -413,6 +435,7 @@ function computeFrame(time) {
     const cube = sceneElements.sceneGraph.getObjectByName("cube");
     
     // fall from the platform
+    /*
     if (cube.position.y > 0.25 && cube.position.x < 30.2 && cube.position.x > -30.2) {   //0.25 is half of the cube height
         cube.position.y -= 0.02;  // velocidade de queda
         cube.position.y -= 0.002;  // gravidade
@@ -430,7 +453,7 @@ function computeFrame(time) {
         sceneElements.camera.position.y -= 0.022;
         //sceneElements.control.update();
 
-    }
+    }*/
     // if in the river, the cube moves slower and gets pushed back
     if (inRiver() && !inBridge()) {    // if the cube is in the river and not in the bridge
         cube.position.z += 0.03;
@@ -444,25 +467,18 @@ function computeFrame(time) {
     }
 
 
-    if (keyD && cube.position.x < 30) {
-        cube.translateX(dispX);
-        if (toggledCamera) {
-            sceneElements.camera.position.x += dispX;
-            sceneElements.camera.lookAt(cube.position);
-        }
+    
 
 
-        //sceneElements.control.update();
-
-    }
-    if (keyW && cube.position.z > -50) {
+    if (inBridge() && (cube.position.z <-1.2 || cube.position.z))     // if the cube is in the bridge
+        keyW = false
+    if (keyW && cube.position.z > -50 ) {
         cube.translateZ(-dispZ);
         if (toggledCamera) {
             sceneElements.camera.position.z -= dispZ;
             sceneElements.camera.lookAt(cube.position);
         }
         //sceneElements.control.update();
-
     }
     if (keyA && cube.position.x > -30) {
         cube.translateX(-dispX);
@@ -471,12 +487,12 @@ function computeFrame(time) {
             sceneElements.camera.lookAt(cube.position);
         }
         //sceneElements.camera.position.x -= dispX;
-
         //sceneElements.control.update();
         //sceneElements.camera.lookAt(cube.position);
-
     }
-    if (keyS && cube.position.z < 50) {
+    if(inBridge() && cube.position.z >1.2)
+        keyS = false
+    if (keyS && cube.position.z < 50 ) {
         cube.translateZ(dispZ);
         if (toggledCamera) {
             sceneElements.camera.position.z += dispZ;
@@ -484,6 +500,15 @@ function computeFrame(time) {
         }
         //sceneElements.control.update();
     }
+    if (keyD && cube.position.x < 90) {
+        cube.translateX(dispX);
+        if (toggledCamera) {
+            sceneElements.camera.position.x += dispX;
+            sceneElements.camera.lookAt(cube.position);
+        }
+        //sceneElements.control.update();
+    }
+
     for (const tree of sceneElements.trees) {
         // let the trees be pushed by the cube
         if (collision({ element1: cube, element2: tree })) {
@@ -510,6 +535,31 @@ function computeFrame(time) {
         }
     }
 
+    // next platform teleport
+    if (cube.position.x > 30.2) {
+
+        const cubePos = cube.position;
+        sceneElements.camera.position.set(cubePos.x + 3, cubePos.y + 2, cubePos.z + 5);
+        //sceneElements.camera.lookAt(cube.position);
+    }
+    
+    /*
+    if(cube.position.x > 30.2){
+        
+        cube.position.set(-30, 60.25, 0);
+        const cubePos = cube.position;
+        sceneElements.camera.position.set(cubePos.x + 3, cubePos.y + 2, cubePos.z + 5);
+        //sceneElements.camera.lookAt(cube.position);
+    }
+    if(cube.position.x < -30.2){
+        cube.position.set(30, 60.25, 0);
+        const cubePos = cube.position;
+        sceneElements.camera.position.set(cubePos.x + 3, cubePos.y + 2, cubePos.z + 5);
+        //sceneElements.camera.lookAt(cube.position);
+    }*/
+
+
+    // animate the birds
     const birds = sceneElements.sceneGraph.getObjectByName("birds");
     if (birds){     // be sure that the birds are loaded
         birds.position.x = 10 * Math.cos(step * 0.2);
@@ -555,6 +605,14 @@ function computeFrame(time) {
     //Call for the next frame
     requestAnimationFrame(computeFrame);
 }
+
+
+
+
+
+
+
+
 
 // Call functions:
 //  1. Initialize the empty scene
@@ -665,3 +723,12 @@ function onDocumentKeyUp(event) {
 // STARTING
 
 init();
+/* 
+// delete road (for example)
+const road = sceneElements.sceneGraph.getObjectByName("road");
+road.visible = false;
+
+//OR 
+
+sceneElements.sceneGraph.remove(road);
+*/

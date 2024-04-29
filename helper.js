@@ -34,14 +34,23 @@ const helper = {
         // ***************************** //
 
         const sun = new THREE.PointLight('rgb(255, 255, 255)', 5000);
-        sun.position.set(60, 20, 0);
+        sun.position.set(100, 20, 0);
         sun.shadow.mapSize.width = 4000;
         sun.shadow.mapSize.height = 4000;
         sun.castShadow = true;
         sun.name = "sun";
         sceneElements.sceneGraph.add(sun);
 
-
+        // REMOVE THIS
+        /*
+        const light = new THREE.PointLight('rgb(255, 255, 255)', 5000);
+        light.position.set(0, 50, 0);
+        light.shadow.mapSize.width = 4000;
+        light.shadow.mapSize.height = 4000;
+        light.castShadow = true;
+        light.name = "light";
+        sceneElements.sceneGraph.add(light);*/
+        // //////////////////////////////////////////////////////////////////
 
         // *********************************** //
         // Create renderer (with shadow map)
