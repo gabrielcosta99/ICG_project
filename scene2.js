@@ -1,5 +1,9 @@
+import * as THREE from 'three';
+import { createRoad, createMountain } from './createFunctions.js';
+
+
 const scene2 = {
-    loadObjects: function (sceneGraph) {
+    loadObjects: function (sceneElements) {
 
         const ambientLight = new THREE.AmbientLight('rgb(255, 255, 255)', 0.2);
         sceneElements.sceneGraph.add(ambientLight);
@@ -24,7 +28,7 @@ const scene2 = {
         // Create the ground
         // ************************** //
         // Load a texture
-        const groundTexture = textureLoader.load('./textures/grass.avif');
+        const groundTexture = sceneElements.textureLoader.load('./textures/grass.avif');
         // Adjust the repeat factor to control the tiling of the texture
         groundTexture.repeat.set(6, 10); // Adjust as needed
         // Adjust the wrap mode to repeat the texture
@@ -40,64 +44,58 @@ const scene2 = {
         //const platformMaterial = new THREE.MeshPhongMaterial({ color: 'rgb(0,255,0)', side: THREE.DoubleSide });
         const platformObject = new THREE.Mesh(platform, platformMaterial);
         //platformObject.position.set(0, 59, 0);
-        platformObject.position.set(0, -1, 0);
+        platformObject.position.set(60, -1, 0);
         platformObject.rotation.x = Math.PI / 2;
-        sceneGraph.add(platformObject);
+        sceneElements.sceneGraph.add(platformObject);
         // Set shadow property
         platformObject.receiveShadow = true;
 
-
-
-        // ************************** //
-        // Create a cube
-        // ************************** //
-        // cube center is at (0,0,0)
-        const cubeGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
-        const cubeMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff });
-        const cubeObject = new THREE.Mesh(cubeGeometry, cubeMaterial);
-        cubeObject.name = "cube";
-        cubeObject.position.set(-30, 0.25, 0);
-        cubeObject.castShadow = true;
-        sceneGraph.add(cubeObject);
-
-
+        sceneElements.sceneGraph.getObjectByName("cube").visible = true;
 
         // ************************** //
         // Add a road
         // ************************** //
         const road = createRoad()
-        road.position.set(0, 0.002, 0)
+        road.position.set(60, 0.002, 0)
         road.receiveShadow = true
         road.name = "road";
-        sceneGraph.add(road)
+        sceneElements.sceneGraph.add(road)
 
         //add lines to the road
         const lineGeometry = new THREE.PlaneGeometry(0.1, 2.5);
         const lineMaterial = new THREE.MeshPhongMaterial({ color: 'rgb(255,255,255)', side: THREE.DoubleSide });
         for (let i = 0; i < 5; i++) {
             const line1 = new THREE.Mesh(lineGeometry, lineMaterial);
-            line1.position.set(-25 + i * 5, 0.003, 0);
+            line1.position.set(35 + i * 5, 0.003, 0);
             line1.rotation.x = Math.PI / 2;
             line1.rotation.z = Math.PI / 2;
-            sceneGraph.add(line1);
+            sceneElements.sceneGraph.add(line1);
         }
         for (let i = 0; i < 5; i++) {
             const line1 = new THREE.Mesh(lineGeometry, lineMaterial);
-            line1.position.set(5 + i * 5, 0.003, 0);
+            line1.position.set(65 + i * 5, 0.003, 0);
             line1.rotation.x = Math.PI / 2;
             line1.rotation.z = Math.PI / 2;
-            sceneGraph.add(line1);
+            sceneElements.sceneGraph.add(line1);
         }
 
         // ************************** //
         // Add mountains
         // ************************** //
         const mountain3 = createMountain()
-        sceneGraph.add(mountain3)
+        sceneElements.sceneGraph.add(mountain3)
 
-        mountain3.position.set(-23, 7.5, 25)
+        mountain3.position.set(37, 7.5, 25)
         mountain3.receiveShadow = true
 
 
     }
 }
+
+
+function init2(sceneElements){
+    scene2.loadObjects(sceneElements);
+}
+
+
+export { init2 };

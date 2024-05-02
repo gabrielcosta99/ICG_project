@@ -7,6 +7,7 @@ import "./js/mountain.js";
 
 import helper from "./helper.js";
 import { createTree, createRiver, createRoad, createBridge, createMountain, riverTexture } from "./createFunctions.js";
+import { init2 } from "./scene2.js";
 
 // To store the scene graph, and elements usefull to rendering the scene
 const sceneElements = {
@@ -14,12 +15,13 @@ const sceneElements = {
     camera: null,
     control: null,  // NEW
     renderer: null,
+    textureLoader: null,
     trees: [],
 };
 const loader = new GLTFLoader();
 const mixer = new THREE.AnimationMixer();
 const textureLoader = new THREE.TextureLoader();
-
+sceneElements.textureLoader = textureLoader;
 
 const scene = {
 
@@ -37,8 +39,8 @@ const scene = {
         // Adjust the wrap mode to repeat the texture
         groundTexture.wrapS = THREE.RepeatWrapping;
         groundTexture.wrapT = THREE.RepeatWrapping;
-     
-        const groundGeometry = new THREE.BoxGeometry(60, 100,2);
+
+        const groundGeometry = new THREE.BoxGeometry(60, 100, 2);
         const groundMaterial = new THREE.MeshPhongMaterial({ map: groundTexture });
         //const groundMaterial = new THREE.MeshPhongMaterial({ color: 'rgb(0,255,0)', side: THREE.DoubleSide });
         const groundObject = new THREE.Mesh(groundGeometry, groundMaterial);
@@ -47,7 +49,7 @@ const scene = {
         sceneGraph.add(groundObject);
         // Set shadow property
         groundObject.receiveShadow = true;
-        
+
         // ************************** //
         // Add another platform
         // ************************** //
@@ -64,7 +66,7 @@ const scene = {
         // Set shadow property
         platformObject.receiveShadow = true;
         */
-        
+
 
         // ************************** //
         // Create a cube
@@ -79,31 +81,7 @@ const scene = {
         cubeObject.castShadow = true;
         sceneGraph.add(cubeObject);
 
-        // ************************** //
-        // Load a 3D models
-        // ************************** //	
         
-
-        // Load birds
-        loader.load('./models/birds.glb', function (gltf) {
-            console.log("here")
-            const birds = gltf.scene;
-            birds.position.set(0, 5, 0);
-            birds.scale.set(2, 2, 2);
-            birds.rotation.y = Math.PI / 2;
-            // Get all animations from the glTF model
-            const animations = gltf.animations;
-
-            if (animations && animations.length) {
-                console.log("animations ", animations);
-                const action = mixer.clipAction(animations[0], birds); 
-                action.setEffectiveTimeScale(0.005);
-                action.play();
-            }   
-            birds.name = "birds";
-            sceneGraph.add(birds);
-        });
-
 
         // ************************** //
         // Add a house
@@ -123,6 +101,7 @@ const scene = {
         const river = createRiver();
         river.position.set(0, 0.006, 0);
         river.name = "river";
+        river.receiveShadow = true;
         sceneGraph.add(river);
 
         /*
@@ -146,14 +125,14 @@ const scene = {
         // ************************** //
         // Add a waterfall
         // ************************** //
-        const waterfallGeometry = new THREE.BoxGeometry(5, 40,0.5);
+        const waterfallGeometry = new THREE.BoxGeometry(5, 40, 0.5);
         const waterfallMaterial = new THREE.MeshPhongMaterial({ map: riverTexture });
         //const waterfallMaterial= new THREE.MeshPhongMaterial({ color: 'rgb(0,0,255)', side: THREE.DoubleSide });
         const waterfall = new THREE.Mesh(waterfallGeometry, waterfallMaterial)
         waterfall.position.set(0, -19.995, 50.25);
         waterfall.rotation.x = Math.PI;
         sceneGraph.add(waterfall);
-       
+
         // ************************** //
         // Add a road
         // ************************** //
@@ -184,7 +163,7 @@ const scene = {
         // add trees along the side of the road
         for (let z = 0; z < 7; z++)
             for (let x = -4; x < 5; x++) {
-                if (x == 0 || z>=2 && x<-2) continue
+                if (x == 0 || z >= 2 && x < -2) continue
                 const tree = createTree();
                 tree.position.set(x * 7, 0, -3 - z * 5)
                 sceneElements.sceneGraph.add(tree)
@@ -192,15 +171,15 @@ const scene = {
             }
         for (let z = 0; z < 7; z++)
             for (let x = -5; x < 6; x++) {
-                if (x == 0 || z>= 3 && x<-2) continue
+                if (x == 0 || z >= 3 && x < -2) continue
                 const tree = createTree();
-                tree.position.set(x * 5, 0, 3 + z*5)
+                tree.position.set(x * 5, 0, 3 + z * 5)
                 sceneElements.sceneGraph.add(tree)
                 sceneElements.trees.push(tree)
             }
 
 
-        
+
         // ************************** //
         // Add a bridge
         // ************************** //
@@ -208,7 +187,7 @@ const scene = {
         bridge.position.set(0, 0.003, 0)
         bridge.receiveShadow = true
         sceneGraph.add(bridge)
-        
+
 
         // ************************** //
         // Add mountains
@@ -229,6 +208,37 @@ const scene = {
         mountain3.position.set(-23, 7.5, 25)
         mountain1.receiveShadow = true
 
+        // ************************** //
+        // Load 3D models
+        // ************************** //	
+
+
+        // Load birds
+        loader.load('./models/birds.glb', function (gltf) {
+            console.log("here")
+            const birds = gltf.scene;
+            birds.position.set(0, 5, 0);
+            birds.scale.set(2, 2, 2);
+            birds.rotation.y = Math.PI / 2;
+            // Get all animations from the glTF model
+            const animations = gltf.animations;
+
+            if (animations && animations.length) {
+                console.log("animations ", animations);
+                const action = mixer.clipAction(animations[0], birds);
+                action.setEffectiveTimeScale(0.005);
+                action.play();
+            }
+
+            birds.traverse(function (child) {
+                if (child.isMesh) {
+                    child.castShadow = true;
+                }
+            });
+            birds.name = "birds";
+            sceneGraph.add(birds);
+        });
+
 
         // ************************** //
         // Add a butterfly
@@ -239,6 +249,11 @@ const scene = {
             butterfly.position.set(-2, 0, -0.1);
             butterfly.scale.set(0.2, 0.2, 0.2);
             butterfly.rotation.x = Math.PI / 4;
+            butterfly.traverse(function (child) {
+                if (child.isMesh) {
+                    child.castShadow = true;
+                }
+            });
             //butterfly.name = "butterfly";
             butterflyGroup.add(butterfly);
         });
@@ -254,10 +269,76 @@ const scene = {
             const flower = gltf.scene;
             flower.position.set(16, 0, -10);
             flower.scale.set(0.3, 0.3, 0.3);
+            flower.traverse(function (child) {
+                if (child.isMesh) {
+                    child.castShadow = true;
+                }
+            });
             sceneGraph.add(flower);
         });
+        
 
-    },    
+
+
+
+
+        // second platform
+        // ************************** //
+        // Add platform
+        // ************************** //
+        const platform = new THREE.BoxGeometry(60, 100, 2);
+        const platformMaterial = new THREE.MeshPhongMaterial({ map: groundTexture});
+
+        //const platformMaterial = new THREE.MeshPhongMaterial({ color: 'rgb(0,255,0)', side: THREE.DoubleSide });
+        const platformObject = new THREE.Mesh(platform, platformMaterial);
+        //platformObject.position.set(0, 59, 0);
+        platformObject.position.set(60, -1, 0);
+        platformObject.rotation.x = Math.PI / 2;
+        platformObject.visible = false;
+        sceneElements.sceneGraph.add(platformObject);
+        // Set shadow property
+        platformObject.receiveShadow = true;
+
+
+        // ************************** //
+        // Add a road
+        // ************************** //
+        const road2 = createRoad()
+        road2.position.set(60, 0.002, 0)
+        road2.receiveShadow = true
+        road2.visible = false;
+        road2.name = "road2";
+        sceneElements.sceneGraph.add(road2)
+
+        //add lines to the road2
+        for (let i = 0; i < 5; i++) {
+            const line = new THREE.Mesh(lineGeometry, lineMaterial);
+            line.position.set(35 + i * 5, 0.003, 0);
+            line.rotation.x = Math.PI / 2;
+            line.rotation.z = Math.PI / 2;
+            line.visible = false;
+            sceneElements.sceneGraph.add(line);
+        }
+        for (let i = 0; i < 5; i++) {
+            const line = new THREE.Mesh(lineGeometry, lineMaterial);
+            line.position.set(65 + i * 5, 0.003, 0);
+            line.rotation.x = Math.PI / 2;
+            line.rotation.z = Math.PI / 2;
+            line.visible = false;
+            sceneElements.sceneGraph.add(line);
+        }
+
+        // ************************** //
+        // Add mountains
+        // ************************** //
+        const mountain4 = createMountain()
+        sceneElements.sceneGraph.add(mountain4)
+
+        mountain4.position.set(37, 7.5, 25)
+        mountain4.receiveShadow = true
+        mountain4.visible = false;
+
+    },
 };
 
 
@@ -299,9 +380,9 @@ function inRiver() {
     return xCollision && cube.position.z < 50
 }
 
-function inBridge(){    // check if the cube is in the bridge
+function inBridge() {    // check if the cube is in the bridge
     // we only need to check the z-axis because the "inRiver" function already checks the x-axis
-   
+
     const cube = sceneElements.sceneGraph.getObjectByName("cube");
     const cubeFront = cube.position.z + 0.5 / 2
     const cubeBack = cube.position.z - 0.5 / 2
@@ -310,10 +391,10 @@ function inBridge(){    // check if the cube is in the bridge
     const bridgeBack = -1.5
 
     const zCollision = cubeFront >= bridgeBack && cubeBack <= bridgeFront
-    return zCollision && cube.position.x>=-2.8 && cube.position.x<=2.8
+    return zCollision && cube.position.x >= -2.8 && cube.position.x <= 2.8
 }
 
-function makeAllElementsInvisible() {
+function makeAllElementsInvisible(sceneGraph) {
     sceneGraph.traverse(function (object) {
         if (object instanceof THREE.Mesh) {
             object.visible = false;
@@ -321,6 +402,13 @@ function makeAllElementsInvisible() {
     });
 }
 
+function changeAllElementsVisibility(sceneGraph) {
+    sceneGraph.traverse(function (object) {
+        if (object instanceof THREE.Mesh) {
+            object.visible = !object.visible;
+        }
+    });
+}
 
 
 
@@ -372,7 +460,7 @@ function computeFrame(time) {
         sun.intensity = 5000;
         sceneElements.renderer.setClearColor('rgb(0, 255, 255)', 1.0);
     }*/
-   
+
 
     //animate the river
     riverTexture.offset.y -= 0.012;
@@ -432,9 +520,10 @@ function computeFrame(time) {
 
 
 
-    if (inBridge() && (cube.position.z <-1.2 || cube.position.z>1.5))     // if the cube is in the bridge
+    if (inBridge() && (cube.position.z < -1.2 || cube.position.z > 1.5))     // if the cube is in the bridge
         keyW = false
-    if (keyW && cube.position.z > -50 ) {
+    
+    if (keyW && cube.position.z > -50) {
         cube.translateZ(-dispZ);
         if (toggledCamera) {
             sceneElements.camera.position.z -= dispZ;
@@ -447,14 +536,15 @@ function computeFrame(time) {
         if (toggledCamera) {
             sceneElements.camera.position.x -= dispX;
             sceneElements.camera.lookAt(cube.position);
+
         }
         //sceneElements.camera.position.x -= dispX;
         //sceneElements.control.update();
         //sceneElements.camera.lookAt(cube.position);
     }
-    if(inBridge() && (cube.position.z >1.2 || cube.position.z<-1.5))
+    if (inBridge() && (cube.position.z > 1.2 || cube.position.z < -1.5))
         keyS = false
-    if (keyS && cube.position.z < 50 ) {
+    if (keyS && cube.position.z < 50) {
         cube.translateZ(dispZ);
         if (toggledCamera) {
             sceneElements.camera.position.z += dispZ;
@@ -462,7 +552,7 @@ function computeFrame(time) {
         }
         //sceneElements.control.update();
     }
-    if (keyD && cube.position.x < 30) {
+    if (keyD && cube.position.x < 90) {
         cube.translateX(dispX);
         if (toggledCamera) {
             sceneElements.camera.position.x += dispX;
@@ -479,7 +569,7 @@ function computeFrame(time) {
             cube.position.add(translate)
             sceneElements.camera.position.add(translate)*/
             // SECOND IDEA
-            
+
             if (tree.position.x > -30 && tree.position.x < 30 && tree.position.z > -50 && tree.position.z < 50) {
                 const translate = cube.position.clone().sub(previousCubePosition).normalize().multiplyScalar(0.1)
                 //const translate = new THREE.Vector3(dispX*keyD - dispX*keyA, 0, dispZ*keyS - dispZ*keyW)
@@ -488,11 +578,11 @@ function computeFrame(time) {
                 console.log(translate)
                 tree.position.add(translate)
             }
-            
+
 
         }
         // let the river carry the trees
-        if (tree.position.x > -2.5 && tree.position.x < 2.5 && ((tree.position.z > -50 && tree.position.z<-1.9) || (tree.position.z < 50 && tree.position.z > 1.9))) {
+        if (tree.position.x > -2.5 && tree.position.x < 2.5 && ((tree.position.z > -50 && tree.position.z < -1.9) || (tree.position.z < 50 && tree.position.z > 1.9))) {
             tree.position.z += 0.03;
         }
     }
@@ -500,18 +590,18 @@ function computeFrame(time) {
 
     // animate the birds
     const birds = sceneElements.sceneGraph.getObjectByName("birds");
-    if (birds){     // be sure that the birds are loaded
+    if (birds) {     // be sure that the birds are loaded
         birds.position.x = 10 * Math.cos(step * 0.2);
         birds.position.z = 10 * Math.sin(step * 0.2);
         // make the bids start turning at the edge of the river
         //if (birds.position.z > 2.5 || birds.position.z < -2.5) {
-            birds.rotation.y = Math.PI / 2 + Math.atan2(birds.position.x, birds.position.z);
+        birds.rotation.y = Math.PI / 2 + Math.atan2(birds.position.x, birds.position.z);
         //}
         birds.position.y = 5 + 2 * Math.sin(step * 0.2);
     }
 
     const butterfly = sceneElements.sceneGraph.getObjectByName("butterfly");
-    if(butterfly){  // be sure that the butterfly is loaded
+    if (butterfly) {  // be sure that the butterfly is loaded
         //butterfly.position.x = 13 + Math.cos(step * 0.5);
         //butterfly.position.z = -9 + Math.sin(step * 0.5);
         // rotate the butterfly around itself
@@ -530,6 +620,38 @@ function computeFrame(time) {
             touchGround = false;
         }
     }*/
+
+
+    // teletransport to new plane
+    if(keyD && cube.position.x > 30.1 && cube.position.x<30.2){   
+        // teleport to the next platform	
+        cube.position.x = 30.3;
+        changeAllElementsVisibility(sceneElements.sceneGraph);
+        cube.visible = true;
+        if (!toggledCamera) {
+            sceneElements.camera.position.set(70, 8, 16)
+            sceneElements.camera.lookAt(60,0,0);
+            sceneElements.control.update();
+        }
+
+    }
+    else if (keyA && cube.position.x > 30.1 && cube.position.x < 30.2){
+        // teleport to the previous platform
+        
+        changeAllElementsVisibility(sceneElements.sceneGraph);
+        const cube = sceneElements.sceneGraph.getObjectByName("cube");
+        cube.position.x = 30;
+        cube.visible = true;
+        if (!toggledCamera) {
+            sceneElements.camera.position.set(10, 8, 16)
+            sceneElements.camera.lookAt(0, 0, 0);
+            sceneElements.control.update();
+        }
+
+    
+    }
+
+
     mixer.update(0.7); // Pass the time delta since the last frame
     step += 0.03;
 
@@ -604,9 +726,10 @@ function onDocumentKeyDown(event) {
         case 81:    //q
             keyQ = true;
             toggledCamera = !toggledCamera;
+            const cubePos = sceneElements.sceneGraph.getObjectByName("cube").position;
+
             if (toggledCamera) {
                 console.log("here")
-                const cubePos = sceneElements.sceneGraph.getObjectByName("cube").position;
                 sceneElements.camera.position.set(cubePos.x + 3, cubePos.y + 2, cubePos.z + 5);
                 sceneElements.camera.lookAt(cubePos);
                 //erase orbitcontrols
@@ -614,16 +737,23 @@ function onDocumentKeyDown(event) {
 
             }
             else {
+                if(cubePos.x<30.2){
 
-                sceneElements.camera.position.set(10, 8, 16);
-                sceneElements.camera.lookAt(0, 0, 0);
-                sceneElements.control = new OrbitControls(sceneElements.camera, sceneElements.renderer.domElement);
-                sceneElements.control.screenSpacePanning = true;
-
+                    sceneElements.camera.position.set(10, 8, 16);
+                    sceneElements.camera.lookAt(0, 0, 0);
+                    sceneElements.control = new OrbitControls(sceneElements.camera, sceneElements.renderer.domElement);
+                    sceneElements.control.screenSpacePanning = true;
+                }
+                else{
+                    sceneElements.camera.position.set(70, 8, 16);
+                    sceneElements.camera.lookAt(60, 0, 0);
+                    sceneElements.control = new OrbitControls(sceneElements.camera, sceneElements.renderer.domElement);
+                    sceneElements.control.screenSpacePanning = true;
+                }
             }
 
             break;
-        
+
         /*
         case 32: //space
             keySpace = true;
