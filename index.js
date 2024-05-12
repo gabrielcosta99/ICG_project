@@ -2,11 +2,11 @@ import * as THREE from "three";
 
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
-import HouseMod from "./js/house-r0.js";
+//import HouseMod from "./js/house-r0.js";
 import "./js/mountain.js";
 
 import helper from "./helper.js";
-import { createTree, createRiver, createRoad, createBridge, createMountain, riverTexture } from "./createFunctions.js";
+import { createTree, createRiver, createRoad, createBridge, createMountain, createHouse, createBarnFence,createDuck, riverTexture } from "./createFunctions.js";
 import { init2 } from "./scene2.js";
 
 // To store the scene graph, and elements usefull to rendering the scene
@@ -51,24 +51,6 @@ const scene = {
         groundObject.receiveShadow = true;
 
         // ************************** //
-        // Add another platform
-        // ************************** //
-        /*
-        const platform = new THREE.BoxGeometry(60, 100, 2);
-        const platformMaterial = new THREE.MeshPhongMaterial({ map: groundTexture });
-
-        //const platformMaterial = new THREE.MeshPhongMaterial({ color: 'rgb(0,255,0)', side: THREE.DoubleSide });
-        const platformObject = new THREE.Mesh(platform, platformMaterial);
-        //platformObject.position.set(0, 59, 0);
-        platformObject.position.set(60, -1, 0);
-        platformObject.rotation.x = Math.PI / 2;
-        sceneGraph.add(platformObject);
-        // Set shadow property
-        platformObject.receiveShadow = true;
-        */
-
-
-        // ************************** //
         // Create a cube
         // ************************** //
         // cube center is at (0,0,0)
@@ -81,19 +63,40 @@ const scene = {
         cubeObject.castShadow = true;
         sceneGraph.add(cubeObject);
 
+        // ************************** //
+        // Add mountains
+        // ************************** //
+        const mountain1 = createMountain()
+        const mountain2 = createMountain()
+        const subMountain2 = createMountain()
+        const mountain3 = createMountain()
+        sceneGraph.add(mountain1)
+        sceneGraph.add(mountain2)
+        sceneGraph.add(subMountain2)
+        sceneGraph.add(mountain3)
+
+        mountain1.position.set(0, 7.5, -43)
+        mountain2.position.set(-23, 7.5, -25)
+        subMountain2.position.set(-25, 6, -18)
+        subMountain2.scale.set(0.7, 0.8, 0.7)
+        mountain3.position.set(-23, 7.5, 25)
+        mountain1.receiveShadow = true
+
         
-
+        /*
         // ************************** //
-        // Add a house
+        // Add a spring (nascente)
         // ************************** //
+        
+        const springGeometry = new THREE.ConeGeometry(6, 10, 16, 1, 0, 5.2, 2)
+        const springMaterial = new THREE.MeshPhongMaterial({ color: 'rgb(0,0,255)', side: THREE.DoubleSide });
+        const spring = new THREE.Mesh(springGeometry, springMaterial);
+        spring.position.set(0, 0.25, -37);
+        spring.name = "spring";
+        spring.receiveShadow = true;
+        sceneGraph.add(spring);
 
-        const house = HouseMod.create();
-        house.position.set(-20, 1, -35);
-        house.rotation.y = Math.PI / 2;
-        house.castShadow = true;
-        house.receiveShadow = true;
-        house.name = "house";
-        sceneGraph.add(house);
+        */
 
         // ************************** //
         // Add a river
@@ -185,28 +188,12 @@ const scene = {
         // ************************** //
         const bridge = createBridge()
         bridge.position.set(0, 0.003, 0)
+        bridge.name = "bridge";
         bridge.receiveShadow = true
         sceneGraph.add(bridge)
 
 
-        // ************************** //
-        // Add mountains
-        // ************************** //
-        const mountain1 = createMountain()
-        const mountain2 = createMountain()
-        const subMountain2 = createMountain()
-        const mountain3 = createMountain()
-        sceneGraph.add(mountain1)
-        sceneGraph.add(mountain2)
-        sceneGraph.add(subMountain2)
-        sceneGraph.add(mountain3)
 
-        mountain1.position.set(0, 7.5, -43)
-        mountain2.position.set(-23, 7.5, -25)
-        subMountain2.position.set(-25, 6, -18)
-        subMountain2.scale.set(0.7, 0.8, 0.7)
-        mountain3.position.set(-23, 7.5, 25)
-        mountain1.receiveShadow = true
 
         // ************************** //
         // Load 3D models
@@ -266,17 +253,22 @@ const scene = {
         // Add a flower
         // ************************** //
         loader.load('./models/flower.glb', function (gltf) {
-            const flower = gltf.scene;
-            flower.position.set(16, 0, -10);
-            flower.scale.set(0.3, 0.3, 0.3);
-            flower.traverse(function (child) {
-                if (child.isMesh) {
-                    child.castShadow = true;
+            for(let i = 0; i < 2; i++){
+                for(let j=0; j<2; j++){
+                    const flower = gltf.scene.clone();
+                    flower.position.set(16 - j*30, 0, -10 + i * 20);
+                    //flower.position.set(16, 0, -10);
+                    flower.scale.set(0.3, 0.3, 0.3);
+                    flower.traverse(function (child) {
+                        if (child.isMesh) {
+                            child.castShadow = true;
+                        }
+                    });
+                    sceneGraph.add(flower);
                 }
-            });
-            sceneGraph.add(flower);
+            }
         });
-        
+
 
 
 
@@ -287,7 +279,7 @@ const scene = {
         // Add platform
         // ************************** //
         const platform = new THREE.BoxGeometry(60, 100, 2);
-        const platformMaterial = new THREE.MeshPhongMaterial({ map: groundTexture});
+        const platformMaterial = new THREE.MeshPhongMaterial({ map: groundTexture });
 
         //const platformMaterial = new THREE.MeshPhongMaterial({ color: 'rgb(0,255,0)', side: THREE.DoubleSide });
         const platformObject = new THREE.Mesh(platform, platformMaterial);
@@ -295,7 +287,7 @@ const scene = {
         platformObject.position.set(60, -1, 0);
         platformObject.rotation.x = Math.PI / 2;
         platformObject.visible = false;
-        sceneElements.sceneGraph.add(platformObject);
+        sceneGraph.add(platformObject);
         // Set shadow property
         platformObject.receiveShadow = true;
 
@@ -303,41 +295,151 @@ const scene = {
         // ************************** //
         // Add a road
         // ************************** //
-        const road2 = createRoad()
-        road2.position.set(60, 0.002, 0)
+        const road2 = createRoad(33)
+        road2.position.set(46.5, 0.002, 0)
         road2.receiveShadow = true
         road2.visible = false;
         road2.name = "road2";
-        sceneElements.sceneGraph.add(road2)
+        sceneGraph.add(road2)
 
         //add lines to the road2
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 6; i++) {
             const line = new THREE.Mesh(lineGeometry, lineMaterial);
             line.position.set(35 + i * 5, 0.003, 0);
             line.rotation.x = Math.PI / 2;
             line.rotation.z = Math.PI / 2;
             line.visible = false;
-            sceneElements.sceneGraph.add(line);
+            sceneGraph.add(line);
         }
-        for (let i = 0; i < 5; i++) {
-            const line = new THREE.Mesh(lineGeometry, lineMaterial);
-            line.position.set(65 + i * 5, 0.003, 0);
-            line.rotation.x = Math.PI / 2;
-            line.rotation.z = Math.PI / 2;
-            line.visible = false;
-            sceneElements.sceneGraph.add(line);
-        }
+
 
         // ************************** //
         // Add mountains
         // ************************** //
         const mountain4 = createMountain()
-        sceneElements.sceneGraph.add(mountain4)
+        sceneGraph.add(mountain4)
 
         mountain4.position.set(37, 7.5, 25)
-        mountain4.receiveShadow = true
         mountain4.visible = false;
 
+
+        // ************************** //
+        // Add a house
+        // ************************** //
+
+        const house = createHouse();
+        sceneGraph.add(house);
+        house.position.set(80, 1, 25);
+        //house.rotation.y = Math.PI / 2;
+        house.castShadow = true;
+        house.receiveShadow = true;
+        house.name = "house";
+
+        
+
+        loader.load('./models/barn.glb', function (gltf) {
+            const barn = gltf.scene;
+            barn.position.set(82, 0, 1);
+            barn.scale.set(0.02, 0.02, 0.02);
+            barn.rotation.y =  Math.PI ;
+            barn.traverse(function (child) {
+                if (child.isMesh) {
+                    child.castShadow = true;
+                    child.receiveShadow = true;
+                    child.visible = false;
+                }
+            });
+            sceneGraph.add(barn);
+        });
+
+        loader.load('./models/horse.glb', function (gltf) {
+            const horse = gltf.scene;
+            horse.position.set(75, 0, -3);
+            horse.scale.set(0.05, 0.05, 0.05);
+            horse.rotation.y = Math.PI;
+            horse.traverse(function (child) {
+                if (child.isMesh) {
+                    child.castShadow = true;
+                    child.receiveShadow = true;
+                    child.visible = false;
+                }
+            });
+            sceneGraph.add(horse);
+        });
+
+        loader.load('./models/cow.glb', function (gltf) {
+            const cow = gltf.scene;
+            cow.position.set(75, 0, 3);
+            cow.scale.set(0.4, 0.4, 0.4);
+            cow.rotation.y = Math.PI;
+            cow.traverse(function (child) {
+                if (child.isMesh) {
+                    child.castShadow = true;
+                    child.receiveShadow = true;
+                    child.visible = false;
+                }
+            });
+            sceneGraph.add(cow);
+        });
+
+
+        // ************************** //
+        // Add a fence to the barn
+        // ************************** //
+        
+        //sceneGraph.add(gate);
+        const barnFence= createBarnFence();
+        sceneGraph.add(barnFence);
+        barnFence.position.z-=1.5;
+
+
+        // ************************** //
+        // Add a pond
+        // ************************** //
+        const pondGeometry = new THREE.CylinderGeometry(5, 5, 0.1, 32);
+        const pondMaterial = new THREE.MeshPhongMaterial({ color: 'rgb(0,0,255)', side: THREE.DoubleSide });
+        const pond = new THREE.Mesh(pondGeometry, pondMaterial);
+        pond.position.set(60, 0, -25);
+        pond.name = "pond";
+        pond.receiveShadow = true;
+        sceneGraph.add(pond);
+        pond.visible = false;
+
+        // ************************** //
+        // Add a duck
+        // ************************** //
+        /*
+        loader.load('./models/duck.glb', function (gltf) {
+            const duck = gltf.scene;
+            duck.position.set(60, 0, -25);
+            duck.scale.set(0.3, 0.3, 0.3);
+            duck.rotation.y = Math.PI / 2;
+
+            duck.traverse(function (child) {
+                if (child.isMesh) {
+                    child.castShadow = true;
+                    child.receiveShadow = true;
+                    child.visible = false;
+                }
+            });
+            duck.name = "duck";
+            sceneGraph.add(duck);
+        });
+        */
+        const duck = createDuck();
+        duck.position.set(60, 0, -25);
+        duck.scale.set(0.03, 0.03, 0.03);
+        duck.rotation.y = Math.PI / 2;
+
+        duck.traverse(function (child) {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+                child.visible = false;
+            }
+        });
+        duck.name = "duck";
+        sceneGraph.add(duck);
     },
 };
 
@@ -384,8 +486,8 @@ function inBridge() {    // check if the cube is in the bridge
     // we only need to check the z-axis because the "inRiver" function already checks the x-axis
 
     const cube = sceneElements.sceneGraph.getObjectByName("cube");
-    const cubeFront = cube.position.z + 0.5 / 2
-    const cubeBack = cube.position.z - 0.5 / 2
+    const cubeFront = cube.position.z + 0.5 /2
+    const cubeBack = cube.position.z - 0.5 /2
 
     const bridgeFront = 1.5
     const bridgeBack = -1.5
@@ -404,7 +506,7 @@ function makeAllElementsInvisible(sceneGraph) {
 
 function changeAllElementsVisibility(sceneGraph) {
     sceneGraph.traverse(function (object) {
-        if (object instanceof THREE.Mesh) {
+        if (object instanceof THREE.Mesh && object.name != "cube") {
             object.visible = !object.visible;
         }
     });
@@ -520,9 +622,9 @@ function computeFrame(time) {
 
 
 
-    if (inBridge() && (cube.position.z < -1.2 || cube.position.z > 1.5))     // if the cube is in the bridge
+    if (inBridge() && (cube.position.z < -1.5 || cube.position.z > 1.5))     // if the cube is in the bridge
         keyW = false
-    
+
     if (keyW && cube.position.z > -50) {
         cube.translateZ(-dispZ);
         if (toggledCamera) {
@@ -608,6 +710,14 @@ function computeFrame(time) {
         butterfly.rotation.y += 0.02;
     }
 
+    const duck = sceneElements.sceneGraph.getObjectByName("duck");
+    if (duck) {  // be sure that the duck is loaded
+        duck.position.x = 60 + 3*Math.cos(step * 0.15);
+        duck.position.z = -25 + 3*Math.sin(step * 0.15);
+       
+        duck.rotation.y -= 0.0045;
+    }
+
     /*
     if (keySpace) {
         if (touchGround) {
@@ -623,32 +733,37 @@ function computeFrame(time) {
 
 
     // teletransport to new plane
-    if(keyD && cube.position.x > 30.1 && cube.position.x<30.2){   
-        // teleport to the next platform	
+    if (keyD && cube.position.x > 30.1 && cube.position.x < 30.2) {
+        // teleport to the next platform
         cube.position.x = 30.3;
         changeAllElementsVisibility(sceneElements.sceneGraph);
-        cube.visible = true;
+
         if (!toggledCamera) {
             sceneElements.camera.position.set(70, 8, 16)
-            sceneElements.camera.lookAt(60,0,0);
+            sceneElements.camera.lookAt(60, 0, 0);
             sceneElements.control.update();
         }
+        console.log("camera.position: ", sceneElements.camera.position)
 
     }
-    else if (keyA && cube.position.x > 30.1 && cube.position.x < 30.2){
+    else if (keyA && cube.position.x > 30.1 && cube.position.x < 30.2) {
         // teleport to the previous platform
-        
         changeAllElementsVisibility(sceneElements.sceneGraph);
+        const house = sceneElements.sceneGraph.getObjectByName("house");
+        const bridge = sceneElements.sceneGraph.getObjectByName("bridge");
+        console.log("bridge.visible: ", bridge.visible)
+        console.log("house.visible: ",house.visible)
         const cube = sceneElements.sceneGraph.getObjectByName("cube");
         cube.position.x = 30;
-        cube.visible = true;
         if (!toggledCamera) {
             sceneElements.camera.position.set(10, 8, 16)
             sceneElements.camera.lookAt(0, 0, 0);
             sceneElements.control.update();
         }
+        console.log("camera.position: ", sceneElements.camera.position)
 
-    
+
+
     }
 
 
@@ -737,14 +852,14 @@ function onDocumentKeyDown(event) {
 
             }
             else {
-                if(cubePos.x<30.2){
+                if (cubePos.x < 30.2) {
 
                     sceneElements.camera.position.set(10, 8, 16);
                     sceneElements.camera.lookAt(0, 0, 0);
                     sceneElements.control = new OrbitControls(sceneElements.camera, sceneElements.renderer.domElement);
                     sceneElements.control.screenSpacePanning = true;
                 }
-                else{
+                else {
                     sceneElements.camera.position.set(70, 8, 16);
                     sceneElements.camera.lookAt(60, 0, 0);
                     sceneElements.control = new OrbitControls(sceneElements.camera, sceneElements.renderer.domElement);

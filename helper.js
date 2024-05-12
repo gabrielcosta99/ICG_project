@@ -34,7 +34,7 @@ const helper = {
         // ***************************** //
 
         const sun = new THREE.PointLight('rgb(255, 255, 255)', 5000);
-        sun.position.set(100, 20, 0);
+        sun.position.set(120, 20, 0);
         sun.shadow.mapSize.width = 4000;
         sun.shadow.mapSize.height = 4000;
         sun.castShadow = true;
