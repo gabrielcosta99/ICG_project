@@ -40,7 +40,7 @@ const scene = {
         groundTexture.wrapS = THREE.RepeatWrapping;
         groundTexture.wrapT = THREE.RepeatWrapping;
 
-        const groundGeometry = new THREE.BoxGeometry(60, 100, 2);
+        const groundGeometry = new THREE.BoxGeometry(60, 80, 2);
         const groundMaterial = new THREE.MeshPhongMaterial({ map: groundTexture });
         //const groundMaterial = new THREE.MeshPhongMaterial({ color: 'rgb(0,255,0)', side: THREE.DoubleSide });
         const groundObject = new THREE.Mesh(groundGeometry, groundMaterial);
@@ -75,7 +75,7 @@ const scene = {
         sceneGraph.add(subMountain2)
         sceneGraph.add(mountain3)
 
-        mountain1.position.set(0, 7.5, -43)
+        mountain1.position.set(0, 7.5, -33)
         mountain2.position.set(-23, 7.5, -25)
         subMountain2.position.set(-25, 6, -18)
         subMountain2.scale.set(0.7, 0.8, 0.7)
@@ -102,7 +102,7 @@ const scene = {
         // Add a river
         // ************************** //
         const river = createRiver();
-        river.position.set(0, 0.006, 0);
+        river.position.set(0, 0.006, 0.5);
         river.name = "river";
         river.receiveShadow = true;
         sceneGraph.add(river);
@@ -132,7 +132,7 @@ const scene = {
         const waterfallMaterial = new THREE.MeshPhongMaterial({ map: riverTexture });
         //const waterfallMaterial= new THREE.MeshPhongMaterial({ color: 'rgb(0,0,255)', side: THREE.DoubleSide });
         const waterfall = new THREE.Mesh(waterfallGeometry, waterfallMaterial)
-        waterfall.position.set(0, -19.995, 50.25);
+        waterfall.position.set(0, -19.995, 40.25);
         waterfall.rotation.x = Math.PI;
         sceneGraph.add(waterfall);
 
@@ -479,7 +479,7 @@ function inRiver() {
     const riverLeft = -2.5
 
     const xCollision = cubeRight >= riverLeft && cubeLeft <= riverRight
-    return xCollision && cube.position.z < 50
+    return xCollision && cube.position.z < 40
 }
 
 function inBridge() {    // check if the cube is in the bridge
@@ -496,13 +496,6 @@ function inBridge() {    // check if the cube is in the bridge
     return zCollision && cube.position.x >= -2.8 && cube.position.x <= 2.8
 }
 
-function makeAllElementsInvisible(sceneGraph) {
-    sceneGraph.traverse(function (object) {
-        if (object instanceof THREE.Mesh) {
-            object.visible = false;
-        }
-    });
-}
 
 function changeAllElementsVisibility(sceneGraph) {
     sceneGraph.traverse(function (object) {
@@ -625,7 +618,7 @@ function computeFrame(time) {
     if (inBridge() && (cube.position.z < -1.5 || cube.position.z > 1.5))     // if the cube is in the bridge
         keyW = false
 
-    if (keyW && cube.position.z > -50) {
+    if (keyW && cube.position.z > -40) {
         cube.translateZ(-dispZ);
         if (toggledCamera) {
             sceneElements.camera.position.z -= dispZ;
@@ -646,7 +639,7 @@ function computeFrame(time) {
     }
     if (inBridge() && (cube.position.z > 1.2 || cube.position.z < -1.5))
         keyS = false
-    if (keyS && cube.position.z < 50) {
+    if (keyS && cube.position.z < 40) {
         cube.translateZ(dispZ);
         if (toggledCamera) {
             sceneElements.camera.position.z += dispZ;
@@ -672,7 +665,7 @@ function computeFrame(time) {
             sceneElements.camera.position.add(translate)*/
             // SECOND IDEA
 
-            if (tree.position.x > -30 && tree.position.x < 30 && tree.position.z > -50 && tree.position.z < 50) {
+            if (tree.position.x > -30 && tree.position.x < 30 && tree.position.z > -40 && tree.position.z < 40) {
                 const translate = cube.position.clone().sub(previousCubePosition).normalize().multiplyScalar(0.1)
                 //const translate = new THREE.Vector3(dispX*keyD - dispX*keyA, 0, dispZ*keyS - dispZ*keyW)
                 console.log(previousCubePosition)
@@ -684,7 +677,7 @@ function computeFrame(time) {
 
         }
         // let the river carry the trees
-        if (tree.position.x > -2.5 && tree.position.x < 2.5 && ((tree.position.z > -50 && tree.position.z < -1.9) || (tree.position.z < 50 && tree.position.z > 1.9))) {
+        if (tree.position.x > -2.5 && tree.position.x < 2.5 && ((tree.position.z > -40 && tree.position.z < -1.9) || (tree.position.z < 40 && tree.position.z > 1.9))) {
             tree.position.z += 0.03;
         }
     }
@@ -907,15 +900,3 @@ function onDocumentKeyUp(event) {
 // STARTING
 
 init();
-// REMOVE ALL ELEMENTS
-// sceneElements.sceneGraph.remove.apply(sceneElements.sceneGraph, sceneElements.sceneGraph.children);
-
-/* 
-// delete road (for example)
-const road = sceneElements.sceneGraph.getObjectByName("road");
-road.visible = false;
-
-//OR 
-
-sceneElements.sceneGraph.remove(road);
-*/

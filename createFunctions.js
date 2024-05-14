@@ -39,7 +39,7 @@ function createTree(scaleX = 1, scaleY = 1, scaleZ = 1) {
 
 let riverTexture;
 function createRiver() {
-    const riverGeometry = new THREE.PlaneGeometry(5, 101);
+    const riverGeometry = new THREE.PlaneGeometry(5, 80);
     //const waterTexture = textureLoader.load('./textures/Water_1_M_Normal.jpg');
     //const waterNormalMap = textureLoader.load('./textures/Water_2_M_Normal.jpg');
     const waterTexture = textureLoader.load('./textures/Water_2_M_Normal.jpg');
