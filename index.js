@@ -4,7 +4,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
 import helper from "./helper.js";
-import { createTree, createRiver, createRoad, createBridge, createMountain, createHouse, createBarn, createPondWithDuck, createLogPile,createChopedTrees, riverTexture } from "./createFunctions.js";
+import { createTree, createRiver, createRoad, createBridge, createMountain, createHouse, createBarn, createPondWithDuck, createLogPile, createChopedTrees, riverTexture } from "./createFunctions.js";
 //import { init2 } from "./scene2.js";
 
 // To store the scene graph, and elements usefull to rendering the scene
@@ -79,21 +79,6 @@ const scene = {
         mountain3.position.set(-23, 7.5, 25)
         mountain1.receiveShadow = true
 
-        
-        /*
-        // ************************** //
-        // Add a spring (nascente)
-        // ************************** //
-        
-        const springGeometry = new THREE.ConeGeometry(6, 10, 16, 1, 0, 5.2, 2)
-        const springMaterial = new THREE.MeshPhongMaterial({ color: 'rgb(0,0,255)', side: THREE.DoubleSide });
-        const spring = new THREE.Mesh(springGeometry, springMaterial);
-        spring.position.set(0, 0.25, -37);
-        spring.name = "spring";
-        spring.receiveShadow = true;
-        sceneGraph.add(spring);
-
-        */
 
         // ************************** //
         // Add a river
@@ -252,11 +237,11 @@ const scene = {
         // Add flower
         // ************************** //
         loader.load('./models/flower.glb', function (gltf) {
-            for(let i = 0; i < 5; i++){
-                for(let j=0; j<4; j++){
-                    if(i==2) continue;
+            for (let i = 0; i < 5; i++) {
+                for (let j = 0; j < 4; j++) {
+                    if (i == 2) continue;
                     const flower = gltf.scene.clone();
-                    flower.position.set(16 - j*10, 0, -20 + i * 10);
+                    flower.position.set(16 - j * 10, 0, -20 + i * 10);
                     //flower.position.set(16, 0, -10);
                     flower.scale.set(0.3, 0.3, 0.3);
                     flower.traverse(function (child) {
@@ -345,7 +330,7 @@ const scene = {
         // ************************** //
         // Add a barn with animals
         // ************************** //
-       
+
         const barn = createBarn();
         sceneGraph.add(barn);
 
@@ -364,13 +349,13 @@ const scene = {
         );
         logPile.position.set(71, 0.5, -17);
         logPile.rotation.z = Math.PI / 2;
-       
+
         // ************************** //
         // Add a pond with a duck
         // ************************** //
         const pondWithDuck = createPondWithDuck();
         sceneGraph.add(pondWithDuck);
-        
+
         // ************************** //
         // Add  choped trees
         // ************************** //
@@ -383,7 +368,7 @@ const scene = {
         // ************************** //
         for (let z = 0; z < 5; z++)
             for (let x = 0; x < 3; x++) {
-                const tree = createTree(2,2,2);
+                const tree = createTree(2, 2, 2);
                 tree.position.set(37 + x * 6, 0, 4 + z * 7)
                 tree.traverse(function (child) {
                     if (child.isMesh) {
@@ -404,20 +389,15 @@ const scene = {
 function collision({ element1, element2 }) {
     const element1Right = element1.position.x + 0.5 / 2
     const element1Left = element1.position.x - 0.5 / 2
-    //const element1Top = element1.position.y + 0.5 / 2
-    //const element1Bottom = element1.position.y - 0.5 / 2
     const element1Front = element1.position.z + 0.5 / 2
     const element1Back = element1.position.z - 0.5 / 2
 
     const element2Right = element2.position.x + 0.5 / 2
     const element2Left = element2.position.x - 0.5 / 2
-    //const element2Top = element2.position.y + 0.5 / 2
-    //const element2Bottom = element2.position.y - 0.5 / 2
     const element2Front = element2.position.z + 0.5 / 2
     const element2Back = element2.position.z - 0.5 / 2
 
     const xCollision = element1Right >= element2Left && element1Left <= element2Right
-    //const yCollision = element1Bottom + 0.02 <= element2Top && element1Top >= element2Bottom
     const zCollision = element1Front >= element2Back && element1Back <= element2Front
     return xCollision && zCollision
 }
@@ -438,8 +418,8 @@ function inBridge() {    // check if the cube is in the bridge
     // we only need to check the z-axis because the "inRiver" function already checks the x-axis
 
     const cube = sceneElements.sceneGraph.getObjectByName("cube");
-    const cubeFront = cube.position.z + 0.5 /2
-    const cubeBack = cube.position.z - 0.5 /2
+    const cubeFront = cube.position.z + 0.5 / 2
+    const cubeBack = cube.position.z - 0.5 / 2
 
     const bridgeFront = 1.5
     const bridgeBack = -1.5
@@ -466,7 +446,6 @@ function changeAllElementsVisibility(sceneGraph) {
 
 // Displacement values
 var dispX = 0.05, dispZ = 0.05;
-var touchGround = false;
 
 // To keep track of the keyboard - WASD
 var keyD = false, keyA = false, keyS = false, keyW = false, keyQ = false, keySpace = false;
@@ -476,83 +455,16 @@ var step = 0;
 let frames = 0
 let previousCubePosition = new THREE.Vector3()
 function computeFrame(time) {
-
-    
+    const cube = sceneElements.sceneGraph.getObjectByName("cube");
     const sun = sceneElements.sceneGraph.getObjectByName("sun");
     // rotate the light around the plane
-    /*
-
     sun.position.x = 150 * Math.cos(step * 0.1);
     sun.position.y = 150 * Math.sin(step * 0.1);
-    // day and night cycle
-    if(sun.position.y >-2  && sun.position.y < 5){
-        sun.intensity -= 20;
-        const color = Math.round(55 + 40 * sun.position.y);
-        sceneElements.renderer.setClearColor(`rgb(0, ${color}, ${color})`, 1.0);
-    }
-    else if(sun.position.y == -2){    // nighttime
-        
-        sun.intensity = 0;
-        sceneElements.renderer.setClearColor('rgb(0, 0, 0)', 1.0);
-    }
-    else if(sun.position.y>=5){   // daytime
-        sun.intensity = 5000;
-        sceneElements.renderer.setClearColor('rgb(0, 255, 255)', 1.0);
-    }
-    /*
-    if(sun.position.y < 0){     // nighttime
-        sun.intensity = 0;
-        sceneElements.renderer.setClearColor('rgb(0, 0, 0)', 1.0);
-    }
-    else{   // daytime
-        sun.intensity = 5000;
-        sceneElements.renderer.setClearColor('rgb(0, 255, 255)', 1.0);
-    }*/
-
 
     //animate the river
     riverTexture.offset.y -= 0.012;
 
-    const cube = sceneElements.sceneGraph.getObjectByName("cube");
-    // next platform teleport
-    /*
-    if (cube.position.x > 30.2) {
-        sceneElements.sceneGraph.remove.apply(sceneElements.sceneGraph, sceneElements.sceneGraph.children);
-        scene.loadObjects(sceneElements.sceneGraph);
 
-        // the cube has been updated, so we need to get it again
-        const cube = sceneElements.sceneGraph.getObjectByName("cube");
-        if(toggledCamera){
-            const cubePos = cube.position;
-            sceneElements.camera.position.set(cubePos.x + 3, cubePos.y + 2, cubePos.z + 5);
-            sceneElements.camera.lookAt(cubePos);
-            
-        }
-        //sceneElements.camera.position.set(cubePos.x + 3, cubePos.y + 2, cubePos.z + 5);
-        //sceneElements.camera.lookAt(cube.position);
-    }*/
-
-
-    // fall from the platform
-    /*
-    if (cube.position.y > 0.25 && cube.position.x < 30.2 && cube.position.x > -30.2) {   //0.25 is half of the cube height
-        cube.position.y -= 0.02;  // velocidade de queda
-        cube.position.y -= 0.002;  // gravidade
-        sceneElements.camera.position.y -= 0.022;
-        //sceneElements.control.update();
-    }
-    else {
-        touchGround = true;
-    }
-
-    // fall from the platform
-    if (cube.position.x > 30.2 || cube.position.x < -30.2 || cube.position.z > 50.2 || cube.position.z < -50.2 || cube.position.y < 0.20) {
-        cube.position.y -= 0.02;  // velocidade de queda
-        cube.position.y -= 0.002;  // gravidade
-        sceneElements.camera.position.y -= 0.022;
-        //sceneElements.control.update();
-
-    }*/
     // if in the river, the cube moves slower and gets pushed back
     if (inRiver() && !inBridge()) {    // if the cube is in the river and not in the bridge
         cube.position.z += 0.03;
@@ -567,7 +479,7 @@ function computeFrame(time) {
 
 
 
-    if (inBridge() && (cube.position.z < -1.5 || cube.position.z > 1.5))     // if the cube is in the bridge
+    if (inBridge() && (cube.position.z > 1.5 || cube.position.z < -1.2))     // if the cube is in the bridge
         keyW = false
 
     if (keyW && cube.position.z > -40) {
@@ -576,18 +488,13 @@ function computeFrame(time) {
             sceneElements.camera.position.z -= dispZ;
             sceneElements.camera.lookAt(cube.position);
         }
-        //sceneElements.control.update();
     }
     if (keyA && cube.position.x > -30) {
         cube.translateX(-dispX);
         if (toggledCamera) {
             sceneElements.camera.position.x -= dispX;
             sceneElements.camera.lookAt(cube.position);
-
         }
-        //sceneElements.camera.position.x -= dispX;
-        //sceneElements.control.update();
-        //sceneElements.camera.lookAt(cube.position);
     }
     if (inBridge() && (cube.position.z > 1.2 || cube.position.z < -1.5))
         keyS = false
@@ -597,7 +504,6 @@ function computeFrame(time) {
             sceneElements.camera.position.z += dispZ;
             sceneElements.camera.lookAt(cube.position);
         }
-        //sceneElements.control.update();
     }
     if (keyD && cube.position.x < 90) {
         cube.translateX(dispX);
@@ -605,8 +511,9 @@ function computeFrame(time) {
             sceneElements.camera.position.x += dispX;
             sceneElements.camera.lookAt(cube.position);
         }
-        //sceneElements.control.update();
     }
+
+
 
     for (const tree of sceneElements.trees) {
         // let the trees be pushed by the cube
@@ -635,6 +542,8 @@ function computeFrame(time) {
     }
 
 
+
+
     // animate the birds
     const birds = sceneElements.sceneGraph.getObjectByName("birds");
     if (birds) {     // be sure that the birds are loaded
@@ -656,23 +565,12 @@ function computeFrame(time) {
     }
 
     const duck = sceneElements.sceneGraph.getObjectByName("duck");
-    duck.position.x = 63 + 3*Math.cos(step * 0.15);
-    duck.position.z = -27 + 3*Math.sin(step * 0.15);
-    
+    duck.position.x = 63 + 3 * Math.cos(step * 0.15);
+    duck.position.z = -27 + 3 * Math.sin(step * 0.15);
+
     duck.rotation.y -= 0.0045;
 
-    /*
-    if (keySpace) {
-        if (touchGround) {
-            if (cube.position.y < 1.5) {
-                cube.position.y += 0.1;
-                sceneElements.camera.position.y += 0.1;
-            }
-        }
-        if (cube.position.y >= 1.5) {
-            touchGround = false;
-        }
-    }*/
+
 
     // teletransport to new plane
     if (keyD && cube.position.x > 30.1 && cube.position.x < 30.2) {
@@ -681,21 +579,12 @@ function computeFrame(time) {
         changeAllElementsVisibility(sceneElements.sceneGraph);
 
         if (!toggledCamera) {
-            
+
             sceneElements.camera.position.set(75, 15, cube.position.z + 5);
-            
-
-            /*sceneElements.camera.position.x = 75;
-            sceneElements.camera.position.y = 8;*/
-
             sceneElements.control.update();
-            sceneElements.camera.lookAt(cube.position.x+10, 0, cube.position.z);
-            sceneElements.control.target.set(cube.position.x+10, 0, cube.position.z);
-
-            //sceneElements.control.target.set(60, 0, 0);
+            sceneElements.camera.lookAt(cube.position.x + 10, 0, cube.position.z);
+            sceneElements.control.target.set(cube.position.x + 10, 0, cube.position.z);
         }
-        console.log("camera.position: ", sceneElements.camera.position)
-
     }
     else if (keyA && cube.position.x > 30.1 && cube.position.x < 30.2) {
         // teleport to the previous platform
@@ -704,13 +593,9 @@ function computeFrame(time) {
         cube.position.x = 30;
         if (!toggledCamera) {
             sceneElements.camera.position.set(-5, 15, cube.position.z + 5);
-            /*
-            sceneElements.camera.position.x = 10;
-            sceneElements.camera.position.y = 8;
-            */
             sceneElements.control.update();
-            sceneElements.camera.lookAt(cube.position.x-10, 0, cube.position.z);
-            sceneElements.control.target.set(cube.position.x-10, 0, cube.position.z);
+            sceneElements.camera.lookAt(cube.position.x - 10, 0, cube.position.z);
+            sceneElements.control.target.set(cube.position.x - 10, 0, cube.position.z);
 
         }
 
@@ -819,18 +704,12 @@ function onDocumentKeyDown(event) {
                     //sceneElements.camera.position.x=75;
                     sceneElements.control = new OrbitControls(sceneElements.camera, sceneElements.renderer.domElement);
                     sceneElements.control.screenSpacePanning = true;
-                    sceneElements.camera.lookAt(60,0,0);
+                    sceneElements.camera.lookAt(60, 0, 0);
                     sceneElements.control.target.set(60, 0, 0);
                 }
             }
 
             break;
-
-        /*
-        case 32: //space
-            keySpace = true;
-            break;*/
-
 
     }
 }
@@ -852,11 +731,6 @@ function onDocumentKeyUp(event) {
         case 81:    //q
             keyQ = false;
             break;
-        /*
-        case 32: //space
-            keySpace = false;
-            touchGround = false;    // não permitir double jump só por não chegar á altura máxima
-            break;*/
     }
 }
 

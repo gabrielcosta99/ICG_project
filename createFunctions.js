@@ -42,16 +42,10 @@ function createTree(scaleX = 1, scaleY = 1, scaleZ = 1) {
 let riverTexture;
 function createRiver() {
     const riverGeometry = new THREE.PlaneGeometry(5, 80);
-    //const waterTexture = textureLoader.load('./textures/Water_1_M_Normal.jpg');
-    //const waterNormalMap = textureLoader.load('./textures/Water_2_M_Normal.jpg');
     const waterTexture = textureLoader.load('./textures/Water_2_M_Normal.jpg');
 
-    // Adjust the repeat factor to control the tiling of the texture
-    //waterTexture.repeat.set(6, 100); // Adjust as needed
+    waterTexture.repeat.set(4, 40);
 
-    // Adjust the repeat factor to control the tiling of the texture
-    waterTexture.repeat.set(4, 40); // Adjust as needed
-   
     // Adjust the wrap mode to repeat the texture
     waterTexture.wrapS = THREE.RepeatWrapping;
     waterTexture.wrapT = THREE.RepeatWrapping;
@@ -61,7 +55,7 @@ function createRiver() {
         //normalMap: waterNormalMap,
         side: THREE.DoubleSide,
     });
-    //const riverMaterial = new THREE.MeshPhongMaterial({ color: 'rgb(0,0,255)', side: THREE.DoubleSide });
+
     const riverObject = new THREE.Mesh(riverGeometry, riverMaterial);
     riverObject.rotation.x = Math.PI / 2;
     return riverObject
@@ -123,9 +117,6 @@ function createBridge() {
     stake4.position.set(2.5, 0.25, 1.5);
 
 
-
-
-
     // create bridge
     const bridge = new THREE.Group();
     bridge.add(plank1);
@@ -143,11 +134,6 @@ function createBridge() {
     bridge.add(stake4);
     bridge.receiveShadow = true;
 
-    /*
-    const bridgeGeometry = new THREE.BoxGeometry(5.2, 1, 2); // Adjust dimensions as needed
-    const bridgeMaterial = new THREE.MeshBasicMaterial({ color: 0x8B4513 });
-    const bridge = new THREE.Mesh(bridgeGeometry, bridgeMaterial);
-    */
     return bridge;
 }
 function createMountain() {
@@ -178,15 +164,12 @@ function createHouse() {
     roofTexture.repeat.set(2, 2);
     const frontTexture = textureLoader.load('./textures/wall_door.jpg'); // Texture for the front side
 
-    // Create materials
     const wallMaterial = new THREE.MeshStandardMaterial({ map: wallTexture });
     const roofMaterial = new THREE.MeshStandardMaterial({ map: roofTexture });
     const doorMaterial = new THREE.MeshStandardMaterial({ map: frontTexture });
 
-    // Create house geometry
     const houseGeometry = new THREE.BoxGeometry(7, 5, 8);
 
-    // Apply materials to corresponding faces of the house geometry
     const materials = [
         wallMaterial,       // Right side
         doorMaterial,       // Left side
@@ -196,21 +179,14 @@ function createHouse() {
         wallMaterial,       // Back side
     ];
 
-    // Create mesh with multi-material
     const houseObject = new THREE.Mesh(houseGeometry, materials);
-
-    // Position the house
     houseObject.position.y = 1.5;
 
-    // Create roof geometry
     const roofGeometry = new THREE.ConeGeometry(7, 4, 4);
-
-    // Apply roof material
     const roofObject = new THREE.Mesh(roofGeometry, roofMaterial);
     roofObject.position.y = 5.5;
     roofObject.rotation.y = Math.PI / 4;
 
-    // Create house group
     const house = new THREE.Group();
     house.add(houseObject);
     house.add(roofObject);
@@ -220,7 +196,7 @@ function createHouse() {
 
 
 
-function createFence(){
+function createFence() {
     const stakeGeometry = new THREE.CylinderGeometry(0.2, 0.2, 1.8, 32);
     const stakeMaterial = new THREE.MeshPhongMaterial({ color: 'rgb(139,69,19)' });
     const stake1 = new THREE.Mesh(stakeGeometry, stakeMaterial);
@@ -250,13 +226,13 @@ function createFence(){
     fence.add(clapBoard1);
     fence.add(clapBoard2);
     fence.add(clapBoard3);
-    
+
     return fence;
 
 }
 
 
-function createGate(){
+function createGate() {
     const stakeGeometry = new THREE.CylinderGeometry(0.2, 0.2, 2, 32);
     const stakeMaterial = new THREE.MeshPhongMaterial({ color: 'rgb(139,69,19)' });
     const stake1 = new THREE.Mesh(stakeGeometry, stakeMaterial);
@@ -299,10 +275,10 @@ function createGate(){
     const structure3 = new THREE.Mesh(structure2Geometry, structureMaterial);
 
     structure2.position.set(1.1, 1, 1.6);
-    structure2.rotation.z = Math.PI* 4/10;
+    structure2.rotation.z = Math.PI * 4 / 10;
 
     structure3.position.set(-1.1, 1, 1.6);
-    structure3.rotation.z = -Math.PI* 4/10;
+    structure3.rotation.z = -Math.PI * 4 / 10;
 
     const gate = new THREE.Group();
     gate.add(stake1); gate.add(stake2);
@@ -312,13 +288,12 @@ function createGate(){
     return gate;
 }
 
-function createBarnFence(){
+function createBarnFence() {
     const BARN_FENCE = new THREE.Group();
     for (let k = -1; k < 2; k += 2)
         for (let i = 0; i < 8; i++) {
             const fence1 = createFence();
             fence1.position.set(88 - i * 3, 0.2, -12 * k);
-            //fence1.rotation.y = Math.PI / 2;
             fence1.traverse(function (child) {
                 if (child.isMesh) {
                     child.castShadow = true;
@@ -327,7 +302,6 @@ function createBarnFence(){
                 }
             });
             BARN_FENCE.add(fence1);
-            //sceneGraph.add(fence1);
         }
 
     for (let j = 0; j < 3; j++) {
@@ -342,7 +316,6 @@ function createBarnFence(){
             }
         });
         BARN_FENCE.add(fence2);
-        //sceneGraph.add(fence2);
     }
 
     for (let j = 0; j < 3; j++) {
@@ -357,10 +330,8 @@ function createBarnFence(){
             }
         });
         BARN_FENCE.add(fence2);
-        //sceneGraph.add(fence2);
     }
     const gate = createGate();
-    //gate.position.set(10, 0, -5); 
     gate.position.set(64, 0, 1.5);
     gate.rotation.y = Math.PI / 2;
     gate.traverse(function (child) {
@@ -373,7 +344,9 @@ function createBarnFence(){
     BARN_FENCE.add(gate);
     return BARN_FENCE;
 }
-function createBarn(){
+
+
+function createBarn() {
     const BARN = new THREE.Group();
     loader.load('./models/barn.glb', function (gltf) {
         const barnObject = gltf.scene;
@@ -409,7 +382,7 @@ function createBarn(){
         horse2.position.set(72, 0, 6);
 
         horse2.scale.set(0.05, 0.05, 0.05);
-        horse2.rotation.y = -Math.PI/3;
+        horse2.rotation.y = -Math.PI / 3;
         horse2.traverse(function (child) {
             if (child.isMesh) {
                 child.castShadow = true;
@@ -426,7 +399,7 @@ function createBarn(){
         cow1.position.set(71, 0, -3);
 
         cow1.scale.set(0.4, 0.4, 0.4);
-        cow1.rotation.y = -Math.PI*3/5;
+        cow1.rotation.y = -Math.PI * 3 / 5;
         cow1.traverse(function (child) {
             if (child.isMesh) {
                 child.castShadow = true;
@@ -440,7 +413,7 @@ function createBarn(){
         const cow2 = gltf.scene;
         cow2.position.set(81, 0, 9);
         cow2.scale.set(0.4, 0.4, 0.4);
-        cow2.rotation.y = Math.PI/3;
+        cow2.rotation.y = Math.PI / 3;
         cow2.traverse(function (child) {
             if (child.isMesh) {
                 child.castShadow = true;
@@ -456,6 +429,8 @@ function createBarn(){
     BARN.add(barnFence);
     return BARN;
 }
+
+
 
 function createDuck() {
     const duck = new THREE.Group();
@@ -496,7 +471,7 @@ function createDuck() {
 
 }
 
-function createPondWithDuck(){
+function createPondWithDuck() {
     const POND = new THREE.Group();
 
     const pondGeometry = new THREE.CylinderGeometry(5, 5, 0.1, 32);
@@ -522,15 +497,16 @@ function createPondWithDuck(){
         }
     });
     duck.name = "duck";
-    
+
     POND.add(duck);
 
     return POND;
-
 }
 
-function createLogPile(){
-   const logPile = new THREE.Group();
+
+
+function createLogPile() {
+    const logPile = new THREE.Group();
     const logGeometry = new THREE.CylinderGeometry(0.5, 0.5, 5, 32);
     const logMaterial = new THREE.MeshPhongMaterial({ color: 0x892201 });
     const log1 = new THREE.Mesh(logGeometry, logMaterial);
@@ -556,30 +532,32 @@ function createLogPile(){
     log8.position.set(1.6, 3, 1);
     log9.position.set(1.6, 3, 2);
     log10.position.set(2.4, 3, 1.5);
-    
 
-    logPile.add(log1);logPile.add(log2);logPile.add(log3);
-    logPile.add(log4);logPile.add(log5);logPile.add(log6);
-    logPile.add(log7);logPile.add(log8);logPile.add(log9);
+
+    logPile.add(log1); logPile.add(log2); logPile.add(log3);
+    logPile.add(log4); logPile.add(log5); logPile.add(log6);
+    logPile.add(log7); logPile.add(log8); logPile.add(log9);
     logPile.add(log10);
-   
+
 
     return logPile;
 }
 
-function createChopedTrees(){
+
+
+function createChopedTrees() {
     const CHOPED_TREES = new THREE.Group();
     const chopedTreeGeometry = new THREE.CylinderGeometry(0.5, 0.5, 2, 32);
     const chopedMaterial = new THREE.MeshPhongMaterial({ color: 0x892201 });
     for (let x = 0; x < 4; x++) {
-        for(let z = 0; z < 5; z++){
+        for (let z = 0; z < 5; z++) {
             const chopedTree = new THREE.Mesh(chopedTreeGeometry, chopedMaterial);
-            chopedTree.position.set(35 + x * 5, 0, -30 + z*5);
+            chopedTree.position.set(35 + x * 5, 0, -30 + z * 5);
             chopedTree.rotation.y = Math.PI / 2;
             chopedTree.castShadow = true;
             chopedTree.receiveShadow = true;
             chopedTree.visible = false;
-        
+
             CHOPED_TREES.add(chopedTree);
         }
     }
@@ -590,4 +568,4 @@ function createChopedTrees(){
 
 
 
-export { createTree, createRiver, createRoad, createBridge, createMountain, createHouse, createBarn, createDuck, createPondWithDuck, createLogPile,createChopedTrees, riverTexture}
+export { createTree, createRiver, createRoad, createBridge, createMountain, createHouse, createBarn, createDuck, createPondWithDuck, createLogPile, createChopedTrees, riverTexture }
