@@ -18,10 +18,12 @@ const helper = {
         // ************************** //
         const width = window.innerWidth;
         const height = window.innerHeight;
-        const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 500);
+        const camera = new THREE.PerspectiveCamera(45, width / height, 1, 1000);
         sceneElements.camera = camera;
-        camera.position.set(10, 8, 16);
-        camera.lookAt(3, 0, 0);
+
+        camera.position.set(10, 15, 23);
+        sceneElements.camera.lookAt(0,0,0);
+        
 
         // ************************** //
         // Add ambient light
@@ -33,8 +35,8 @@ const helper = {
         // Add point light souce (sun) with shadows
         // ***************************** //
 
-        const sun = new THREE.PointLight('rgb(255, 255, 255)', 5000);
-        sun.position.set(120, 20, 0);
+        const sun = new THREE.PointLight('rgb(255, 255, 255)', 30000);
+        sun.position.set(150, 150, 0);
         sun.shadow.mapSize.width = 4000;
         sun.shadow.mapSize.height = 4000;
         sun.castShadow = true;
@@ -42,14 +44,14 @@ const helper = {
         sceneElements.sceneGraph.add(sun);
 
         // REMOVE THIS
-        
+        /*
         const light = new THREE.PointLight('rgb(255, 255, 255)', 5000);
         light.position.set(0, 50, 0);
         light.shadow.mapSize.width = 4000;
         light.shadow.mapSize.height = 4000;
         light.castShadow = true;
         light.name = "light";
-        sceneElements.sceneGraph.add(light);/**/
+        sceneElements.sceneGraph.add(light);*/
         // //////////////////////////////////////////////////////////////////
 
         // *********************************** //
@@ -74,7 +76,7 @@ const helper = {
         // ************************** //
         // Control for the camera
         // ************************** //
-        sceneElements.control = new OrbitControls(camera, renderer.domElement);
+        sceneElements.control = new OrbitControls(sceneElements.camera, renderer.domElement);
         sceneElements.control.screenSpacePanning = true;
     },
 

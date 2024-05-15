@@ -2,12 +2,10 @@ import * as THREE from "three";
 
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
-//import HouseMod from "./js/house-r0.js";
-import "./js/mountain.js";
 
 import helper from "./helper.js";
-import { createTree, createRiver, createRoad, createBridge, createMountain, createHouse, createBarnFence,createDuck, riverTexture } from "./createFunctions.js";
-import { init2 } from "./scene2.js";
+import { createTree, createRiver, createRoad, createBridge, createMountain, createHouse, createBarn, createPondWithDuck, createLogPile, riverTexture } from "./createFunctions.js";
+//import { init2 } from "./scene2.js";
 
 // To store the scene graph, and elements usefull to rendering the scene
 const sceneElements = {
@@ -15,13 +13,13 @@ const sceneElements = {
     camera: null,
     control: null,  // NEW
     renderer: null,
-    textureLoader: null,
+    //textureLoader: null,
     trees: [],
 };
 const loader = new GLTFLoader();
 const mixer = new THREE.AnimationMixer();
 const textureLoader = new THREE.TextureLoader();
-sceneElements.textureLoader = textureLoader;
+//sceneElements.textureLoader = textureLoader;
 
 const scene = {
 
@@ -53,7 +51,6 @@ const scene = {
         // ************************** //
         // Create a cube
         // ************************** //
-        // cube center is at (0,0,0)
 
         const cubeGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
         const cubeMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff });
@@ -200,12 +197,14 @@ const scene = {
         // ************************** //	
 
 
-        // Load birds
+        // ************************** //
+        // Add birds
+        // ************************** //
         loader.load('./models/birds.glb', function (gltf) {
             console.log("here")
             const birds = gltf.scene;
             birds.position.set(0, 5, 0);
-            birds.scale.set(2, 2, 2);
+            birds.scale.set(2.5, 2.5, 2.5);
             birds.rotation.y = Math.PI / 2;
             // Get all animations from the glTF model
             const animations = gltf.animations;
@@ -228,7 +227,7 @@ const scene = {
 
 
         // ************************** //
-        // Add a butterfly
+        // Add butterfly
         // ************************** //
         const butterflyGroup = new THREE.Group();
         loader.load('./models/butterfly.glb', function (gltf) {
@@ -250,7 +249,7 @@ const scene = {
 
 
         // ************************** //
-        // Add a flower
+        // Add flower
         // ************************** //
         loader.load('./models/flower.glb', function (gltf) {
             for(let i = 0; i < 2; i++){
@@ -331,115 +330,46 @@ const scene = {
         sceneGraph.add(house);
         house.position.set(80, 1, 25);
         //house.rotation.y = Math.PI / 2;
-        house.castShadow = true;
-        house.receiveShadow = true;
         house.name = "house";
-
-        
-
-        loader.load('./models/barn.glb', function (gltf) {
-            const barn = gltf.scene;
-            barn.position.set(82, 0, 1);
-            barn.scale.set(0.02, 0.02, 0.02);
-            barn.rotation.y =  Math.PI ;
-            barn.traverse(function (child) {
-                if (child.isMesh) {
-                    child.castShadow = true;
-                    child.receiveShadow = true;
-                    child.visible = false;
-                }
-            });
-            sceneGraph.add(barn);
-        });
-
-        loader.load('./models/horse.glb', function (gltf) {
-            const horse = gltf.scene;
-            horse.position.set(75, 0, -3);
-            horse.scale.set(0.05, 0.05, 0.05);
-            horse.rotation.y = Math.PI;
-            horse.traverse(function (child) {
-                if (child.isMesh) {
-                    child.castShadow = true;
-                    child.receiveShadow = true;
-                    child.visible = false;
-                }
-            });
-            sceneGraph.add(horse);
-        });
-
-        loader.load('./models/cow.glb', function (gltf) {
-            const cow = gltf.scene;
-            cow.position.set(75, 0, 3);
-            cow.scale.set(0.4, 0.4, 0.4);
-            cow.rotation.y = Math.PI;
-            cow.traverse(function (child) {
-                if (child.isMesh) {
-                    child.castShadow = true;
-                    child.receiveShadow = true;
-                    child.visible = false;
-                }
-            });
-            sceneGraph.add(cow);
-        });
-
-
-        // ************************** //
-        // Add a fence to the barn
-        // ************************** //
-        
-        //sceneGraph.add(gate);
-        const barnFence= createBarnFence();
-        sceneGraph.add(barnFence);
-        barnFence.position.z-=1.5;
-
-
-        // ************************** //
-        // Add a pond
-        // ************************** //
-        const pondGeometry = new THREE.CylinderGeometry(5, 5, 0.1, 32);
-        const pondMaterial = new THREE.MeshPhongMaterial({ color: 'rgb(0,0,255)', side: THREE.DoubleSide });
-        const pond = new THREE.Mesh(pondGeometry, pondMaterial);
-        pond.position.set(60, 0, -25);
-        pond.name = "pond";
-        pond.receiveShadow = true;
-        sceneGraph.add(pond);
-        pond.visible = false;
-
-        // ************************** //
-        // Add a duck
-        // ************************** //
-        /*
-        loader.load('./models/duck.glb', function (gltf) {
-            const duck = gltf.scene;
-            duck.position.set(60, 0, -25);
-            duck.scale.set(0.3, 0.3, 0.3);
-            duck.rotation.y = Math.PI / 2;
-
-            duck.traverse(function (child) {
-                if (child.isMesh) {
-                    child.castShadow = true;
-                    child.receiveShadow = true;
-                    child.visible = false;
-                }
-            });
-            duck.name = "duck";
-            sceneGraph.add(duck);
-        });
-        */
-        const duck = createDuck();
-        duck.position.set(60, 0, -25);
-        duck.scale.set(0.03, 0.03, 0.03);
-        duck.rotation.y = Math.PI / 2;
-
-        duck.traverse(function (child) {
+        house.traverse(function (child) {
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
                 child.visible = false;
             }
         });
-        duck.name = "duck";
-        sceneGraph.add(duck);
+        house.scale.z = 1.2;
+
+
+        // ************************** //
+        // Add a barn with animals
+        // ************************** //
+       
+        const barn = createBarn();
+        sceneGraph.add(barn);
+
+        // ************************** //
+        // Add a log pile
+        // ************************** //
+        const logPile = createLogPile();
+        sceneGraph.add(logPile);
+        logPile.traverse(function (child) {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+                child.visible = false;
+            }
+        }
+        );
+        logPile.position.set(71, 0.5, -17);
+        logPile.rotation.z = Math.PI / 2;
+       
+        // ************************** //
+        // Add a pond with a duck
+        // ************************** //
+        const PondWithDuck = createPondWithDuck();
+        sceneGraph.add(PondWithDuck);
+        
     },
 };
 
@@ -525,12 +455,12 @@ let frames = 0
 let previousCubePosition = new THREE.Vector3()
 function computeFrame(time) {
 
-    /*
+    
     const sun = sceneElements.sceneGraph.getObjectByName("sun");
     // rotate the light around the plane
-    sun.position.x = 60 * Math.cos(step * 0.1);
-    sun.position.y = 60 * Math.sin(step * 0.1);
-    
+    sun.position.x = 150 * Math.cos(step * 0.1);
+    sun.position.y = 150 * Math.sin(step * 0.1);
+    /*
     // day and night cycle
     if(sun.position.y >-2  && sun.position.y < 5){
         sun.intensity -= 20;
@@ -611,7 +541,6 @@ function computeFrame(time) {
     else {
         dispX = 0.05;
     }
-
 
 
 
@@ -724,7 +653,6 @@ function computeFrame(time) {
         }
     }*/
 
-
     // teletransport to new plane
     if (keyD && cube.position.x > 30.1 && cube.position.x < 30.2) {
         // teleport to the next platform
@@ -732,9 +660,18 @@ function computeFrame(time) {
         changeAllElementsVisibility(sceneElements.sceneGraph);
 
         if (!toggledCamera) {
-            sceneElements.camera.position.set(70, 8, 16)
-            sceneElements.camera.lookAt(60, 0, 0);
+            
+            sceneElements.camera.position.set(75, 15, cube.position.z + 5);
+            
+
+            /*sceneElements.camera.position.x = 75;
+            sceneElements.camera.position.y = 8;*/
+
             sceneElements.control.update();
+            sceneElements.camera.lookAt(cube.position.x+10, 0, cube.position.z);
+            sceneElements.control.target.set(cube.position.x+10, 0, cube.position.z);
+
+            //sceneElements.control.target.set(60, 0, 0);
         }
         console.log("camera.position: ", sceneElements.camera.position)
 
@@ -742,18 +679,19 @@ function computeFrame(time) {
     else if (keyA && cube.position.x > 30.1 && cube.position.x < 30.2) {
         // teleport to the previous platform
         changeAllElementsVisibility(sceneElements.sceneGraph);
-        const house = sceneElements.sceneGraph.getObjectByName("house");
-        const bridge = sceneElements.sceneGraph.getObjectByName("bridge");
-        console.log("bridge.visible: ", bridge.visible)
-        console.log("house.visible: ",house.visible)
         const cube = sceneElements.sceneGraph.getObjectByName("cube");
         cube.position.x = 30;
         if (!toggledCamera) {
-            sceneElements.camera.position.set(10, 8, 16)
-            sceneElements.camera.lookAt(0, 0, 0);
+            sceneElements.camera.position.set(-5, 15, cube.position.z + 5);
+            /*
+            sceneElements.camera.position.x = 10;
+            sceneElements.camera.position.y = 8;
+            */
             sceneElements.control.update();
+            sceneElements.camera.lookAt(cube.position.x-10, 0, cube.position.z);
+            sceneElements.control.target.set(cube.position.x-10, 0, cube.position.z);
+
         }
-        console.log("camera.position: ", sceneElements.camera.position)
 
 
 
@@ -847,16 +785,21 @@ function onDocumentKeyDown(event) {
             else {
                 if (cubePos.x < 30.2) {
 
-                    sceneElements.camera.position.set(10, 8, 16);
-                    sceneElements.camera.lookAt(0, 0, 0);
+                    sceneElements.camera.position.set(10, 15, 23);
+                    //sceneElements.camera.position.x=10;
                     sceneElements.control = new OrbitControls(sceneElements.camera, sceneElements.renderer.domElement);
                     sceneElements.control.screenSpacePanning = true;
+                    sceneElements.camera.lookAt(0, 0, 0);
+                    sceneElements.control.target.set(0, 0, 0);
+
                 }
                 else {
-                    sceneElements.camera.position.set(70, 8, 16);
-                    sceneElements.camera.lookAt(60, 0, 0);
+                    sceneElements.camera.position.set(75, 15, 23);
+                    //sceneElements.camera.position.x=75;
                     sceneElements.control = new OrbitControls(sceneElements.camera, sceneElements.renderer.domElement);
                     sceneElements.control.screenSpacePanning = true;
+                    sceneElements.camera.lookAt(60,0,0);
+                    sceneElements.control.target.set(60, 0, 0);
                 }
             }
 
