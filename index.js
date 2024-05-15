@@ -21,6 +21,7 @@ const mixer = new THREE.AnimationMixer();
 const textureLoader = new THREE.TextureLoader();
 //sceneElements.textureLoader = textureLoader;
 
+// ********************************* Scene ********************************* //
 const scene = {
 
     // Create and insert in the scene graph the models of the 3D scene
@@ -380,10 +381,7 @@ const scene = {
     },
 };
 
-
-
-
-
+// ********************************* Auxiliary functions ********************************* //
 
 // COLLISION DETECTION
 function collision({ element1, element2 }) {
@@ -437,27 +435,22 @@ function changeAllElementsVisibility(sceneGraph) {
     });
 }
 
-
-
-
-
-
-// ANIMATION
+// ********************************* Animations ********************************* //
 
 // Displacement values
 var dispX = 0.05, dispZ = 0.05;
 
 // To keep track of the keyboard - WASD
-var keyD = false, keyA = false, keyS = false, keyW = false, keyQ = false, keySpace = false;
+var keyD = false, keyA = false, keyS = false, keyW = false, keyQ = false;
 var toggledCamera = false;
 var step = 0;
 
-let frames = 0
 let previousCubePosition = new THREE.Vector3()
 function computeFrame(time) {
     const cube = sceneElements.sceneGraph.getObjectByName("cube");
     const sun = sceneElements.sceneGraph.getObjectByName("sun");
-    // rotate the light around the plane
+    
+    // rotate the sun around the plane
     sun.position.x = 150 * Math.cos(step * 0.1);
     sun.position.y = 150 * Math.sin(step * 0.1);
 
@@ -607,7 +600,6 @@ function computeFrame(time) {
     mixer.update(0.7); // Pass the time delta since the last frame
     step += 0.03;
 
-    frames++
     previousCubePosition = cube.position.clone()
     //sceneElements.camera.position.set(cube.position.x, cube.position.y + 2, cube.position.z + 5);
     // Rendering

@@ -60,6 +60,8 @@ function createRiver() {
     riverObject.rotation.x = Math.PI / 2;
     return riverObject
 }
+
+
 function createRoad(length = 60) {
     const roadGeometry = new THREE.PlaneGeometry(length, 5);
     const roadMaterial = new THREE.MeshPhongMaterial({ color: 'rgb(0,0,0)', side: THREE.DoubleSide });
@@ -67,6 +69,8 @@ function createRoad(length = 60) {
     roadObject.rotation.x = Math.PI / 2;
     return roadObject
 }
+
+
 function createBridge() {
     // create planks
     const plankGeometry = new THREE.BoxGeometry(1, 0.1, 3);
@@ -136,6 +140,7 @@ function createBridge() {
 
     return bridge;
 }
+
 function createMountain() {
     const mountainTexture = textureLoader.load('./textures/mountain.jpg');
 
