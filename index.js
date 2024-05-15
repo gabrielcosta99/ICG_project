@@ -4,7 +4,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
 import helper from "./helper.js";
-import { createTree, createRiver, createRoad, createBridge, createMountain, createHouse, createBarn, createPondWithDuck, createLogPile, riverTexture } from "./createFunctions.js";
+import { createTree, createRiver, createRoad, createBridge, createMountain, createHouse, createBarn, createPondWithDuck, createLogPile,createChopedTrees, riverTexture } from "./createFunctions.js";
 //import { init2 } from "./scene2.js";
 
 // To store the scene graph, and elements usefull to rendering the scene
@@ -161,7 +161,7 @@ const scene = {
         }
 
         // add trees along the side of the road
-        for (let z = 0; z < 7; z++)
+        for (let z = 0; z < 6; z++)
             for (let x = -4; x < 5; x++) {
                 if (x == 0 || z >= 2 && x < -2) continue
                 const tree = createTree();
@@ -169,7 +169,7 @@ const scene = {
                 sceneElements.sceneGraph.add(tree)
                 sceneElements.trees.push(tree)
             }
-        for (let z = 0; z < 7; z++)
+        for (let z = 0; z < 6; z++)
             for (let x = -5; x < 6; x++) {
                 if (x == 0 || z >= 3 && x < -2) continue
                 const tree = createTree();
@@ -252,10 +252,11 @@ const scene = {
         // Add flower
         // ************************** //
         loader.load('./models/flower.glb', function (gltf) {
-            for(let i = 0; i < 2; i++){
-                for(let j=0; j<2; j++){
+            for(let i = 0; i < 5; i++){
+                for(let j=0; j<4; j++){
+                    if(i==2) continue;
                     const flower = gltf.scene.clone();
-                    flower.position.set(16 - j*30, 0, -10 + i * 20);
+                    flower.position.set(16 - j*10, 0, -20 + i * 10);
                     //flower.position.set(16, 0, -10);
                     flower.scale.set(0.3, 0.3, 0.3);
                     flower.traverse(function (child) {
@@ -318,7 +319,7 @@ const scene = {
         const mountain4 = createMountain()
         sceneGraph.add(mountain4)
 
-        mountain4.position.set(37, 7.5, 25)
+        mountain4.position.set(60, 7.5, 45)
         mountain4.visible = false;
 
 
@@ -367,9 +368,30 @@ const scene = {
         // ************************** //
         // Add a pond with a duck
         // ************************** //
-        const PondWithDuck = createPondWithDuck();
-        sceneGraph.add(PondWithDuck);
+        const pondWithDuck = createPondWithDuck();
+        sceneGraph.add(pondWithDuck);
         
+        // ************************** //
+        // Add  choped trees
+        // ************************** //
+        const chopedTrees = createChopedTrees();
+        sceneGraph.add(chopedTrees);
+
+
+        // ************************** //
+        // Add a trees
+        // ************************** //
+        for (let z = 0; z < 5; z++)
+            for (let x = 0; x < 3; x++) {
+                const tree = createTree(2,2,2);
+                tree.position.set(37 + x * 6, 0, 4 + z * 7)
+                tree.traverse(function (child) {
+                    if (child.isMesh) {
+                        child.visible = false;
+                    }
+                });
+                sceneElements.sceneGraph.add(tree)
+            }
     },
 };
 
@@ -458,9 +480,10 @@ function computeFrame(time) {
     
     const sun = sceneElements.sceneGraph.getObjectByName("sun");
     // rotate the light around the plane
+    /*
+
     sun.position.x = 150 * Math.cos(step * 0.1);
     sun.position.y = 150 * Math.sin(step * 0.1);
-    /*
     // day and night cycle
     if(sun.position.y >-2  && sun.position.y < 5){
         sun.intensity -= 20;
@@ -633,12 +656,10 @@ function computeFrame(time) {
     }
 
     const duck = sceneElements.sceneGraph.getObjectByName("duck");
-    if (duck) {  // be sure that the duck is loaded
-        duck.position.x = 60 + 3*Math.cos(step * 0.15);
-        duck.position.z = -25 + 3*Math.sin(step * 0.15);
-       
-        duck.rotation.y -= 0.0045;
-    }
+    duck.position.x = 63 + 3*Math.cos(step * 0.15);
+    duck.position.z = -27 + 3*Math.sin(step * 0.15);
+    
+    duck.rotation.y -= 0.0045;
 
     /*
     if (keySpace) {

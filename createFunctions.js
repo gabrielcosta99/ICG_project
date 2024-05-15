@@ -13,7 +13,7 @@ function createTree(scaleX = 1, scaleY = 1, scaleZ = 1) {
     const cylinderRadius = 0.25;
     const cylinderHeight = 1;
     const cylinderGeometry = new THREE.CylinderGeometry(cylinderRadius, cylinderRadius, cylinderHeight, 32);
-    const redMaterial = new THREE.MeshPhongMaterial({ color: 0xff0000 });
+    const redMaterial = new THREE.MeshPhongMaterial({ color: 0x892201 });
     const cylinder = new THREE.Mesh(cylinderGeometry, redMaterial);
     // Move base of the cylinder to y = 0
     cylinder.position.y = cylinderHeight / 2.0;
@@ -426,7 +426,7 @@ function createBarn(){
         cow1.position.set(71, 0, -3);
 
         cow1.scale.set(0.4, 0.4, 0.4);
-        cow1.rotation.y = -Math.PI*2/3;
+        cow1.rotation.y = -Math.PI*3/5;
         cow1.traverse(function (child) {
             if (child.isMesh) {
                 child.castShadow = true;
@@ -438,7 +438,7 @@ function createBarn(){
     });
     loader.load('./models/cow.glb', function (gltf) {
         const cow2 = gltf.scene;
-        cow2.position.set(77, 0, 9);
+        cow2.position.set(81, 0, 9);
         cow2.scale.set(0.4, 0.4, 0.4);
         cow2.rotation.y = Math.PI/3;
         cow2.traverse(function (child) {
@@ -502,7 +502,7 @@ function createPondWithDuck(){
     const pondGeometry = new THREE.CylinderGeometry(5, 5, 0.1, 32);
     const pondMaterial = new THREE.MeshPhongMaterial({ color: 'rgb(0,0,255)', side: THREE.DoubleSide });
     const pondObject = new THREE.Mesh(pondGeometry, pondMaterial);
-    pondObject.position.set(60, 0, -25);
+    pondObject.position.set(63, 0, -27);
     pondObject.name = "pond";
     pondObject.receiveShadow = true;
     pondObject.visible = false;
@@ -510,7 +510,7 @@ function createPondWithDuck(){
     POND.add(pondObject);
     // ************************** //
     const duck = createDuck();
-    duck.position.set(60, 0, -25);
+    duck.position.set(63, 0, -27);
     duck.scale.set(0.03, 0.03, 0.03);
     duck.rotation.y = Math.PI / 2;
 
@@ -532,7 +532,7 @@ function createPondWithDuck(){
 function createLogPile(){
    const logPile = new THREE.Group();
     const logGeometry = new THREE.CylinderGeometry(0.5, 0.5, 5, 32);
-    const logMaterial = new THREE.MeshPhongMaterial({ color: 'rgb(139,69,19)' });
+    const logMaterial = new THREE.MeshPhongMaterial({ color: 0x892201 });
     const log1 = new THREE.Mesh(logGeometry, logMaterial);
     const log2 = new THREE.Mesh(logGeometry, logMaterial);
     const log3 = new THREE.Mesh(logGeometry, logMaterial);
@@ -567,6 +567,27 @@ function createLogPile(){
     return logPile;
 }
 
+function createChopedTrees(){
+    const CHOPED_TREES = new THREE.Group();
+    const chopedTreeGeometry = new THREE.CylinderGeometry(0.5, 0.5, 2, 32);
+    const chopedMaterial = new THREE.MeshPhongMaterial({ color: 0x892201 });
+    for (let x = 0; x < 4; x++) {
+        for(let z = 0; z < 5; z++){
+            const chopedTree = new THREE.Mesh(chopedTreeGeometry, chopedMaterial);
+            chopedTree.position.set(35 + x * 5, 0, -30 + z*5);
+            chopedTree.rotation.y = Math.PI / 2;
+            chopedTree.castShadow = true;
+            chopedTree.receiveShadow = true;
+            chopedTree.visible = false;
+        
+            CHOPED_TREES.add(chopedTree);
+        }
+    }
+    return CHOPED_TREES;
+
+}
 
 
-export { createTree, createRiver, createRoad, createBridge, createMountain, createHouse, createBarn, createDuck, createPondWithDuck, createLogPile, riverTexture}
+
+
+export { createTree, createRiver, createRoad, createBridge, createMountain, createHouse, createBarn, createDuck, createPondWithDuck, createLogPile,createChopedTrees, riverTexture}
