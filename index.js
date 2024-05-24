@@ -172,7 +172,12 @@ const scene = {
         const bridge = createBridge()
         bridge.position.set(0, 0.003, 0)
         bridge.name = "bridge";
-        bridge.receiveShadow = true
+        bridge.traverse(function (child) {
+            if (child.isMesh) {
+                child.receiveShadow = true;
+                // não adicionei o castShadow porque parece que fica desfocado
+            }
+        });
         sceneGraph.add(bridge)
 
 
@@ -449,7 +454,7 @@ let previousCubePosition = new THREE.Vector3()
 function computeFrame(time) {
     const cube = sceneElements.sceneGraph.getObjectByName("cube");
     const sun = sceneElements.sceneGraph.getObjectByName("sun");
-    
+
     // rotate the sun around the plane
     sun.position.x = 150 * Math.cos(step * 0.1);
     sun.position.y = 150 * Math.sin(step * 0.1);
