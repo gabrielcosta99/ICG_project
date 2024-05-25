@@ -1,14 +1,15 @@
 <!DOCTYPE html>
 
 <html lang="en">
+
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title> 3D scene </title>
+  <title> 3D scene </title>
 
-    <link rel="stylesheet" href="style.css">
-    <script type="importmap">
+  <link rel="stylesheet" href="style.css">
+  <script type="importmap">
         {
           "imports": {
             "three": "https://threejs.org/build/three.module.js",
@@ -16,12 +17,31 @@
           }
         }
       </script>
-    <script type="module" src="index.js"></script>
+  <script type="module" src="index.js"></script>
+  <script type="text/javascript" src="html.js"></script>
 
 </head>
 
 <body>
-    <div id="Tag3DScene"> </div>
+  <div id="controlsOverlay">
+    <h2>Controls</h2>
+    <ul>
+      <li> Control the camera with mouse dragging and scroll</li>
+      <li>Use WASD to move the cube</li>
+      <li>Press 'Q' to change POV</li>
+    </ul>
+    <h2>Hints</h2>
+    <ul>
+      <li>Try bumping into a tree</li>
+      <li>Try going to the right limit of the platform</li>
+      <li>Try going to the river</li>
+    </ul>
+    <button id="closeOverlay">Close</button>
+
+  </div>
+  <button id="showOverlay" style="display: none;">Show Controls</button>
+  <div id="Tag3DScene"> </div>
+  </div>
 </body>
 
 </html>
